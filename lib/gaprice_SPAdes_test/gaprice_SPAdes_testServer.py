@@ -37,14 +37,14 @@ def get_config():
     retconfig = {}
     config = ConfigParser()
     config.read(get_config_file())
-    for nameval in config.items(get_service_name() or 'gaprice_SPAdes'):
+    for nameval in config.items(get_service_name() or 'gaprice_SPAdes_test'):
         retconfig[nameval[0]] = nameval[1]
     return retconfig
 
 config = get_config()
 
-from gaprice_SPAdes.gaprice_SPAdesImpl import gaprice_SPAdes
-impl_gaprice_SPAdes = gaprice_SPAdes(config)
+from gaprice_SPAdes_test.gaprice_SPAdes_testImpl import gaprice_SPAdes_test
+impl_gaprice_SPAdes_test = gaprice_SPAdes_test(config)
 
 
 class JSONObjectEncoder(json.JSONEncoder):
@@ -61,9 +61,9 @@ class JSONObjectEncoder(json.JSONEncoder):
 sync_methods = {}
 async_run_methods = {}
 async_check_methods = {}
-async_run_methods['gaprice_SPAdes.run_SPAdes_async'] = ['gaprice_SPAdes', 'run_SPAdes']
-async_check_methods['gaprice_SPAdes.run_SPAdes_check'] = ['gaprice_SPAdes', 'run_SPAdes']
-sync_methods['gaprice_SPAdes.run_SPAdes'] = True
+async_run_methods['gaprice_SPAdes_test.run_SPAdes_async'] = ['gaprice_SPAdes_test', 'run_SPAdes']
+async_check_methods['gaprice_SPAdes_test.run_SPAdes_check'] = ['gaprice_SPAdes_test', 'run_SPAdes']
+sync_methods['gaprice_SPAdes_test.run_SPAdes'] = True
 
 class AsyncJobServiceClient(object):
 
@@ -324,7 +324,7 @@ class Application(object):
                                    context['method'], context['call_id'])
 
     def __init__(self):
-        submod = get_service_name() or 'gaprice_SPAdes'
+        submod = get_service_name() or 'gaprice_SPAdes_test'
         self.userlog = log.log(
             submod, ip_address=True, authuser=True, module=True, method=True,
             call_id=True, changecallback=self.logcallback,
@@ -335,10 +335,13 @@ class Application(object):
         self.serverlog.set_log_level(6)
         self.rpc_service = JSONRPCServiceCustom()
         self.method_authentication = dict()
-        self.rpc_service.add(impl_gaprice_SPAdes.run_SPAdes,
-                             name='gaprice_SPAdes.run_SPAdes',
+        self.rpc_service.add(impl_gaprice_SPAdes_test.run_SPAdes,
+                             name='gaprice_SPAdes_test.run_SPAdes',
                              types=[dict])
-        self.method_authentication['gaprice_SPAdes.run_SPAdes'] = 'required'
+        self.method_authentication['gaprice_SPAdes_test.run_SPAdes'] = 'required'
+        self.rpc_service.add(impl_gaprice_SPAdes_test.status,
+                             name='gaprice_SPAdes_test.status',
+                             types=[dict])
         self.auth_client = biokbase.nexus.Client(
             config={'server': 'nexus.api.globusonline.org',
                     'verify_ssl': True,
@@ -392,7 +395,7 @@ class Application(object):
                         if token is None and auth_req == 'required':
                             err = ServerError()
                             err.data = "Authentication required for " + \
-                                "gaprice_SPAdes but no authentication header was passed"
+                                "gaprice_SPAdes_test but no authentication header was passed"
                             raise err
                         elif token is None and auth_req == 'optional':
                             pass

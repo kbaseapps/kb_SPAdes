@@ -1,7 +1,7 @@
-SERVICE = gaprice_spades
-SERVICE_CAPS = gaprice_SPAdes
-SPEC_FILE = gaprice_SPAdes.spec
-URL = https://kbase.us/services/gaprice_spades
+SERVICE = gaprice_spades_test
+SERVICE_CAPS = gaprice_SPAdes_test
+SPEC_FILE = gaprice_SPAdes_test.spec
+URL = https://kbase.us/services/gaprice_spades_test
 DIR = $(shell pwd)
 LIB_DIR = lib
 SCRIPTS_DIR = scripts

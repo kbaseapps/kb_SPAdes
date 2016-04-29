@@ -11,7 +11,7 @@ A coverage cutoff is not specified.
 
 */
 
-module gaprice_SPAdes {
+module gaprice_SPAdes_test {
 
     /* A boolean. 0 = false, anything else = true. */
     typedef int bool;

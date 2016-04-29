@@ -10,7 +10,7 @@ import psutil
 import requests
 from biokbase.workspace.client import Workspace as workspaceService  # @UnresolvedImport @IgnorePep8
 from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # @UnresolvedImport @IgnorePep8
-from gaprice_SPAdes.gaprice_SPAdesImpl import gaprice_SPAdes, ShockException
+from gaprice_SPAdes_test.gaprice_SPAdes_testImpl import gaprice_SPAdes_test, ShockException
 from biokbase.workspace.client import ServerError as WorkspaceError  # @UnresolvedImport @IgnorePep8
 from pprint import pprint
 import shutil
@@ -24,7 +24,7 @@ class gaprice_SPAdesTest(unittest.TestCase):
         cls.token = environ.get('KB_AUTH_TOKEN', None)
         cls.ctx = {'token': cls.token,
                    'provenance': [
-                        {'service': 'gaprice_SPAdes',
+                        {'service': 'gaprice_SPAdes_test',
                          'method': 'please_never_use_it_in_production',
                          'method_params': []
                          }],
@@ -33,7 +33,7 @@ class gaprice_SPAdesTest(unittest.TestCase):
         cls.cfg = {}
         config = ConfigParser()
         config.read(config_file)
-        for nameval in config.items('gaprice_SPAdes'):
+        for nameval in config.items('gaprice_SPAdes_test'):
             cls.cfg[nameval[0]] = nameval[1]
         cls.wsURL = cls.cfg['workspace-url']
         cls.shockURL = cls.cfg['shock-url']
@@ -41,10 +41,10 @@ class gaprice_SPAdesTest(unittest.TestCase):
                                token=cls.token)
         cls.wsClient = workspaceService(cls.wsURL, token=cls.token)
         wssuffix = int(time.time() * 1000)
-        wsName = "test_gaprice_SPAdes_" + str(wssuffix)
+        wsName = "test_gaprice_SPAdes_test_" + str(wssuffix)
         cls.wsinfo = cls.wsClient.create_workspace({'workspace': wsName})
         print('created workspace ' + cls.getWsName())
-        cls.serviceImpl = gaprice_SPAdes(cls.cfg)
+        cls.serviceImpl = gaprice_SPAdes_test(cls.cfg)
         cls.staged = {}
         cls.nodes_to_delete = []
         cls.handles_to_delete = []
@@ -589,7 +589,7 @@ class gaprice_SPAdesTest(unittest.TestCase):
                   dna_source=None, exception=ValueError):
 
         test_name = inspect.stack()[1][3]
-        print('\n===== starting expected fail test: ' + test_name + ' =====')
+        print('\n***** starting expected fail test: ' + test_name + ' *****')
         print('    libs: ' + str(readnames))
 
         if wsname == ('fake'):
@@ -619,7 +619,7 @@ class gaprice_SPAdesTest(unittest.TestCase):
                     dna_source=None):
 
         test_name = inspect.stack()[1][3]
-        print('\n==== starting expected success test: ' + test_name + ' =====')
+        print('\n**** starting expected success test: ' + test_name + ' *****')
         print('   libs: ' + str(readnames))
 
         if not contig_count:

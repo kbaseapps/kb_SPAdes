@@ -29,7 +29,7 @@ def _get_token(user_id, password,
                         'grant_type=client_credentials'):
     # This is bandaid helper function until we get a full
     # KBase python auth client released
-    auth = _base64.encodestring(user_id + ':' + password)
+    auth = _base64.b64encode(user_id + ':' + password)
     headers = {'Authorization': 'Basic ' + auth}
     ret = _requests.get(auth_svc, headers=headers, allow_redirects=True)
     status = ret.status_code
@@ -103,7 +103,7 @@ class _JSONObjectEncoder(_json.JSONEncoder):
         return _json.JSONEncoder.default(self, obj)
 
 
-class gaprice_SPAdes(object):
+class gaprice_SPAdes_test(object):
 
     def __init__(self, url=None, timeout=30 * 60, user_id=None,
                  password=None, token=None, ignore_authrc=False,
@@ -174,7 +174,7 @@ class gaprice_SPAdes(object):
     def run_SPAdes(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
             raise ValueError('Method run_SPAdes: argument json_rpc_context is not type dict as required.')
-        resp = self._call('gaprice_SPAdes.run_SPAdes',
+        resp = self._call('gaprice_SPAdes_test.run_SPAdes',
                           [params], json_rpc_context)
         return resp[0]
  
