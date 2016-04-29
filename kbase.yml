@@ -1,5 +1,5 @@
 module-name:
-    gaprice_SPAdes_test
+    gaprice_SPAdes
 
 module-description:
     SPAdes wrapper - http://bioinf.spbau.ru/spades

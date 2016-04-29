@@ -13,7 +13,6 @@ import subprocess
 import hashlib
 import numpy as np
 import yaml
-from gaprice_SPAdes_test.GenericClient import GenericClient
 
 
 class ShockException(Exception):
@@ -22,10 +21,10 @@ class ShockException(Exception):
 #END_HEADER
 
 
-class gaprice_SPAdes_test:
+class gaprice_SPAdes:
     '''
     Module Name:
-    gaprice_SPAdes_test
+    gaprice_SPAdes
 
     Module Description:
     A KBase module: gaprice_SPAdes
@@ -45,10 +44,6 @@ A coverage cutoff is not specified.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     #########################################
-    VERSION = "0.0.1"
-    GIT_URL = "https://github.com/mrcreosote/gaprice_SPAdes"
-    GIT_COMMIT_HASH = "41086fbc4658be1b14e2e623addbcf8e8ac5fff6"
-    
     #BEGIN_CLASS_HEADER
     # Class variables and functions can be defined in this block
     DISABLE_SPADES_OUTPUT = False  # should be False in production
@@ -589,8 +584,6 @@ A coverage cutoff is not specified.
     # be found
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
-        self.generic_clientURL = os.environ['SDK_CALLBACK_URL']
-        self.log('Callback URL: ' + self.generic_clientURL)
         self.workspaceURL = config[self.URL_WS]
         self.shockURL = config[self.URL_SHOCK]
         self.scratch = os.path.abspath(config['scratch'])
@@ -598,7 +591,6 @@ A coverage cutoff is not specified.
             os.makedirs(self.scratch)
         #END_CONSTRUCTOR
         pass
-    
 
     def run_SPAdes(self, ctx, params):
         # ctx is the context object
@@ -615,42 +607,18 @@ A coverage cutoff is not specified.
         self.process_params(params)
 
         # Get the reads library
-        gc = GenericClient(self.generic_clientURL, use_url_lookup=False,
-                           token=token)
-        reads_params = {self.PARAM_IN_WS: params[self.PARAM_IN_WS],
-                        self.PARAM_IN_LIB: params[self.PARAM_IN_LIB]}
-        reads = gc.sync_call(
-            "kb_read_library_to_file.convert_read_library_to_file",
-            [reads_params], json_rpc_context={"service_ver": "dev"}
-            )[0]['files']
-        print(reads)
-
-        reads_data = []
-        for r in reads:
-            f = reads[r]['files']
-            if 'sing' in f:
-                raise ValueError(('{} is a single end read library, which ' +
-                                  'is not currently supported.').format(r))
-            if 'inter' in f:
-                reads_data.append({'fwd_file': f['inter']})
-            elif 'fwd' in f:
-                reads_data.append({'fwd_file': f['fwd'], 'rev_file': f['rev']})
-            else:
-                raise ValueError('Something is very wrong with read lib' + r)
-
-        ws_id = reads[r]['ref'].split('/')[0]
         ws = workspaceService(self.workspaceURL, token=token)
-#         ws_reads_ids = []
-#         for read_name in params[self.PARAM_IN_LIB]:
-#             ws_reads_ids.append({'ref': params[self.PARAM_IN_WS] + '/' +
-#                                  read_name})
-#         reads = ws.get_objects(ws_reads_ids)
-# 
-#         ws_id = reads[0]['info'][6]
-#         reads_data = []
-#         for read in reads:
-#             reads_data.append(self.process_reads(read, params, token))
-#         del reads
+        ws_reads_ids = []
+        for read_name in params[self.PARAM_IN_LIB]:
+            ws_reads_ids.append({'ref': params[self.PARAM_IN_WS] + '/' +
+                                 read_name})
+        reads = ws.get_objects(ws_reads_ids)
+
+        ws_id = reads[0]['info'][6]
+        reads_data = []
+        for read in reads:
+            reads_data.append(self.process_reads(read, params, token))
+        del reads
 
         spades_out = self.exec_spades(params[self.PARAM_IN_DNA_SOURCE],
                                       reads_data)
@@ -673,7 +641,7 @@ A coverage cutoff is not specified.
         # add additional info to provenance here, in this case the input data
         # object reference
         provenance[0]['input_ws_objects'] = \
-            [reads[x]['ref'] for x in reads]
+            [x['in_lib_ref'] for x in reads_data]
 
         # save the contigset output
         new_obj_info = ws.save_objects({
@@ -703,10 +671,3 @@ A coverage cutoff is not specified.
                              'output is not type dict as required.')
         # return the results
         return [output]
-
-    def status(self, ctx):
-        #BEGIN_STATUS
-        returnVal = {'state': "OK", 'message': "", 'version': self.VERSION, 
-                     'git_url': self.GIT_URL, 'git_commit_hash': self.GIT_COMMIT_HASH}
-        #END_STATUS
-        return [returnVal]

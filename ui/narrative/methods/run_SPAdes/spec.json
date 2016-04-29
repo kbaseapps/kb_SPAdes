@@ -61,7 +61,7 @@
     "behavior": {
         "service-mapping": {
             "url": "",
-            "name": "gaprice_SPAdes_test",
+            "name": "gaprice_SPAdes",
             "method": "run_SPAdes",
             "input_mapping": [
                 {
