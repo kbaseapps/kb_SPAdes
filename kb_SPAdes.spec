@@ -33,8 +33,13 @@ module kb_SPAdes {
                      DNA sample from multiple cells. Default value is None.
     min_contig_length - (optional) integer to filter out contigs with length < min_contig_length
                      from the SPAdes output. Default value is 0 implying no filter.
-
+    kmer_sizes - (optional) K-mer sizes, Default values: 33, 55, 77, 99, 127
+                     (all values must be odd, less than 128 and listed in ascending order)
+                     In the absence of these values, K values are automatically selected.
+    skip_error_correction - (optional) Assembly only (No error correction).
+                     By default this is disabled.
     */
+
     typedef structure {
         string workspace_name;
         string output_contigset_name;

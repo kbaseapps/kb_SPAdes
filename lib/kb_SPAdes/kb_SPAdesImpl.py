@@ -5,7 +5,7 @@ from __future__ import print_function
 import os
 import re
 import uuid
-from pprint import pformat  # , pprint
+from pprint import pformat, pprint
 from biokbase.workspace.client import Workspace as workspaceService  # @UnresolvedImport @IgnorePep8
 import requests
 import json
@@ -199,7 +199,7 @@ A coverage cutoff is not specified.
             yaml.safe_dump(yml, yml_file)
         return yml_path, iontorrent_present
 
-    def exec_spades(self, dna_source, reads_data, phred_type):
+    def exec_spades(self, dna_source, reads_data, phred_type, kmer_sizes, skip_error_correction):
         mem = (psutil.virtual_memory().available / self.GB -
                self.MEMORY_OFFSET_GB)
         if mem < self.MIN_MEMORY_GB:
@@ -256,6 +256,12 @@ A coverage cutoff is not specified.
         else:
             cmd += ['--careful']
         cmd += ['--phred-offset', phred_type]
+
+        if kmer_sizes is not None:
+            cmd += ['-k ' + kmer_sizes]
+        if skip_error_correction == 1:
+            cmd += ['--only-assembler']
+
 #        print("LENGTH OF READSDATA IN EXEC: " + str(len(reads_data)))
 #        print("READS DATA: " + str(reads_data))
 #        print("SPADES YAML: " + str(self.generate_spades_yaml(reads_data)))
@@ -279,7 +285,6 @@ A coverage cutoff is not specified.
         if p.returncode != 0:
             raise ValueError('Error running SPAdes, return code: ' +
                              str(retcode) + '\n')
-
         return outdir
 
     # adapted from
@@ -501,11 +506,13 @@ A coverage cutoff is not specified.
         if self.PARAM_IN_MIN_CONTIG_LENGTH in params:
             if not isinstance(params[self.PARAM_IN_MIN_CONTIG_LENGTH], int):
                 raise ValueError('min_contig_length must be of type int')
-        if self.PARAM_IN_KMER_SIZES in params:
-            for size in params[self.PARAM_IN_KMER_SIZES]:
-                print("KMER SIZE: " + str(size))
-        if self.PARAM_IN_SKIP_ERR_CORRECT in params:
-            print("SKIP ERR CORRECTION: " + str(params(self.PARAM_IN_SKIP_ERR_CORRECT)))
+        if self.PARAM_IN_KMER_SIZES in params and params[self.PARAM_IN_KMER_SIZES] is not None:
+            print("KMER_SIZES: " + ",".join(str(num) for num in params[self.PARAM_IN_KMER_SIZES]))
+            if len(params[self.PARAM_IN_KMER_SIZES]) < 3:
+                raise ValueError('Insufficient number of k-mer sizes: Expected atleast 3 values: ' +
+                                 ",".join(str(num) for num in params[self.PARAM_IN_KMER_SIZES]))
+        if self.PARAM_IN_SKIP_ERR_CORRECT in params and params[self.PARAM_IN_SKIP_ERR_CORRECT] is not None:
+            print("SKIP ERR CORRECTION: " + str(params[self.PARAM_IN_SKIP_ERR_CORRECT]))
 
     #END_CLASS_HEADER
 
@@ -625,8 +632,23 @@ A coverage cutoff is not specified.
                                    'seq_tech': seq_tech})
             else:
                 raise ValueError('Something is very wrong with read lib' + reads_name)
+
+        kmer_sizes = None
+        if self.PARAM_IN_KMER_SIZES in params and params[self.PARAM_IN_KMER_SIZES] is not None:
+            if (len(params[self.PARAM_IN_KMER_SIZES])) > 0:
+                kmer_sizes = ",".join(str(num) for num in params[self.PARAM_IN_KMER_SIZES])
+
+        skip_error_correction = 0
+        if self.PARAM_IN_SKIP_ERR_CORRECT in params and params[self.PARAM_IN_SKIP_ERR_CORRECT] is not None:
+            if params[self.PARAM_IN_SKIP_ERR_CORRECT] == 1:
+                skip_error_correction = 1
+
         spades_out = self.exec_spades(params[self.PARAM_IN_DNA_SOURCE],
-                                      reads_data, phred_type)
+                                      reads_data,
+                                      phred_type,
+                                      kmer_sizes,
+                                      skip_error_correction)
+
         self.log('SPAdes output dir: ' + spades_out)
 
         # parse the output and save back to KBase
@@ -635,8 +657,6 @@ A coverage cutoff is not specified.
         self.log('Uploading FASTA file to Assembly')
 
         assemblyUtil = AssemblyUtil(self.callbackURL, token=ctx['token'], service_ver='release')
-
-
 
         if params.get('min_contig_length', 0) > 0:
             assemblyUtil.save_assembly_from_fasta(

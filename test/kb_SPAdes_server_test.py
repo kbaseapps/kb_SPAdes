@@ -472,7 +472,6 @@ class gaprice_SPAdesTest(unittest.TestCase):
             ['single_end'], 'single_out',
             dna_source='None')
 
-
     def test_multiple_bad(self):
         # Testing where input reads have different phred types (33 and 64)
         self.run_error(['intbasic64', 'frbasic'],
@@ -490,6 +489,18 @@ class gaprice_SPAdesTest(unittest.TestCase):
             ['frbasic'], 'single_cell_out',
             dna_source='single_cell')
 
+    def test_meta_kmer_sizes(self):
+
+        self.run_success(
+            ['frbasic'], 'frbasic_out',
+            contig_count=2, dna_source='metagenomic',
+            kmer_sizes=[33, 55, 77, 99, 127])
+
+    def test_invalid_kmer_sizes(self):
+
+        self.run_error(
+            ['frbasic'], 'Insufficient number of k-mer sizes: Expected atleast 3 values: 33',
+            kmer_sizes=[33])
 
     def test_invalid_min_contig_length(self):
 
@@ -682,7 +693,8 @@ class gaprice_SPAdesTest(unittest.TestCase):
 # # don't check ver or commit since they can change from run to run
 
     def run_error(self, readnames, error, wsname=('fake'), output_name='out',
-                  dna_source=None, min_contig_length=0, exception=ValueError):
+                  dna_source=None, min_contig_length=0, exception=ValueError,
+                  kmer_sizes=None, skip_error_correction=0):
 
         test_name = inspect.stack()[1][3]
         print('\n***** starting expected fail test: ' + test_name + ' *****')
@@ -708,18 +720,20 @@ class gaprice_SPAdesTest(unittest.TestCase):
             params['dna_source'] = dna_source
 
         params['min_contig_length'] = min_contig_length
+        params['kmer_sizes'] = kmer_sizes
+        params['skip_error_correction'] = skip_error_correction
 
         with self.assertRaises(exception) as context:
             self.getImpl().run_SPAdes(self.ctx, params)
         self.assertEqual(error, str(context.exception.message))
 
     def run_success(self, readnames, output_name, expected=None, contig_count=None,
-                    min_contig_length=0, dna_source=None):
+                    min_contig_length=0, dna_source=None,
+                    kmer_sizes=None, skip_error_correction=0):
 
         test_name = inspect.stack()[1][3]
         print('\n**** starting expected success test: ' + test_name + ' *****')
         print('   libs: ' + str(readnames))
-
 
         print("READNAMES: " + str(readnames))
         print("STAGED: " + str(self.staged))
@@ -731,7 +745,9 @@ class gaprice_SPAdesTest(unittest.TestCase):
         params = {'workspace_name': self.getWsName(),
                   'read_libraries': libs,
                   'output_contigset_name': output_name,
-                  'min_contig_length': min_contig_length
+                  'min_contig_length': min_contig_length,
+                  'kmer_sizes': kmer_sizes,
+                  'skip_error_correction': skip_error_correction
                   }
 
         if not (dna_source is None):
@@ -817,7 +833,7 @@ class gaprice_SPAdesTest(unittest.TestCase):
                   # They changed because the SPAdes version changed and
                   # Need to see them to update the tests accordingly.
                   # If code gets here this test is designed to always fail, but show results.
-                  self.assertEqual(str(assembly['data']['contigs']),"BLAH")
+                  self.assertEqual(str(assembly['data']['contigs']), "BLAH")
 
 
     def run_non_deterministic_success(self, readnames, output_name,

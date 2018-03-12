@@ -48,6 +48,17 @@ parameters :
             Minimum Contig Length
         short-hint : |
             The shortest contig to accept in the resulting assembly object
+    kmer_sizes :
+        ui-name : |
+            K-mer Sizes
+        short-hint : |
+            K-mer sizes (all values must be odd, less than 128 and listed in ascending order)
+            In the absence of these values, K values are automatically selected.
+    skip_error_correction :
+        ui-name : |
+            Assembly only (No Error Correction)
+        short-hint : |
+            Assembly only (No Error Correction)
 description : |
     <p>
     This is a KBase wrapper for the 
@@ -71,7 +82,7 @@ description : |
         <li> Metagenome assembly can only be run on a paired end library.</li>
         <li> Illumina and IonTorrent reads can not be mixed in the same assembly.</li>
         <li> PacBIO CLR needs to be run with at least one accompanying Illumina or IonTorrent library.</li>
-        <li> The k-mer parameter is autodetected by SPAdes.</li>
+        <li> The k-mer parameter is autodetected by SPAdes, if the values are not specified in input.</li>
         <li> The PHRED parameter is autodetected by EAUtils.</li>
     </ul>
     If you need support for command line options not exposed in the wrapper
