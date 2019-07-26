@@ -15,7 +15,7 @@ module kb_SPAdes {
 
     /* A boolean. 0 = false, anything else = true. */
     typedef int bool;
-    
+
     /* The workspace object name of a PairedEndLibrary file, whether of the
        KBaseAssembly or KBaseFile type.
     */
@@ -96,7 +96,7 @@ module kb_SPAdes {
                      (all values must be odd, less than 128 and listed in ascending order)
                      In the absence of these values, K values are automatically selected.
     min_contig_length - integer to filter out contigs with length < min_contig_length
-                     from the HybridSPAdes output. Default value is 0 implying no filter.    
+                     from the HybridSPAdes output. Default value is 0 implying no filter.
     @optional dna_source
     @optional pipeline_options
     @optional kmer_sizes
@@ -126,7 +126,7 @@ module kb_SPAdes {
         string report_name;
         string report_ref;
     } SPAdesOutput;
-    
+
     /* Run SPAdes on paired end libraries */
     funcdef run_SPAdes(SPAdesParams params) returns(SPAdesOutput output)
         authentication required;
@@ -140,16 +140,6 @@ module kb_SPAdes {
         authentication required;
 
     /*
-        params - the params used to run metaSPAdes.
-        use_defaults - (optional, def 0) if 1, just return the default requirements
-        use_heuristic - (optional, def 1) if 1, only use a heuristic based on the reads metadata to perform estimates
-    */
-    typedef structure {
-        SPAdesParams params;
-        int use_defaults;
-    } MetaSPAdesEstimatorParams;
-
-    /*
         cpus - the number of CPUs required for the run
         memory - the minimal amount of memory in MB required for the run
         walltime - an estimate for walltime in seconds for the run
@@ -159,8 +149,8 @@ module kb_SPAdes {
         int memory;
         int walltime;
     } MetaSPAdesEstimate;
-    
-    funcdef estimate_metaSPAdes_requirements(MetaSPAdesEstimatorParams params) returns 
+
+    funcdef estimate_metaSPAdes_requirements(SPAdesParams params) returns
         (MetaSPAdesEstimate results) authentication required;
 };
 

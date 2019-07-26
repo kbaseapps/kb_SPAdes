@@ -167,15 +167,10 @@ class kb_SPAdes(object):
 
     def estimate_metaSPAdes_requirements(self, params, context=None):
         """
-        :param params: instance of type "MetaSPAdesEstimatorParams" (params -
-           the params used to run metaSPAdes. use_defaults - (optional, def
-           0) if 1, just return the default requirements use_heuristic -
-           (optional, def 1) if 1, only use a heuristic based on the reads
-           metadata to perform estimates) -> structure: parameter "params" of
-           type "SPAdesParams" (Input parameters for running SPAdes.
-           workspace_name - the name of the workspace from which to take
-           input and store output. output_contigset_name - the name of the
-           output contigset read_libraries - a list of Illumina
+        :param params: instance of type "SPAdesParams" (Input parameters for
+           running SPAdes. workspace_name - the name of the workspace from
+           which to take input and store output. output_contigset_name - the
+           name of the output contigset read_libraries - a list of Illumina
            PairedEndLibrary files in FASTQ or BAM format. dna_source -
            (optional) the source of the DNA used for sequencing
            'single_cell': DNA amplified from a single cell via MDA anything
@@ -195,7 +190,7 @@ class kb_SPAdes(object):
            "dna_source" of String, parameter "min_contig_length" of Long,
            parameter "kmer_sizes" of list of Long, parameter
            "skip_error_correction" of type "bool" (A boolean. 0 = false,
-           anything else = true.), parameter "use_defaults" of Long
+           anything else = true.)
         :returns: instance of type "MetaSPAdesEstimate" (cpus - the number of
            CPUs required for the run memory - the minimal amount of memory in
            MB required for the run walltime - an estimate for walltime in
