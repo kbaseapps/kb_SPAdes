@@ -1,4 +1,4 @@
-def estimate_metaSPAdes_reqs(params, ws, use_defaults=False):
+def estimate_metaSPAdes_reqs(params, ws):
     """
     Generates an estimate of how much computational power is needed to run metaSPAdes.
     params: dict with keys (only relevant ones given):
@@ -18,19 +18,13 @@ def estimate_metaSPAdes_reqs(params, ws, use_defaults=False):
         raise ValueError("workspace_name is required to estimate metaSPAdes requirements!")
     if len(params.get("read_libraries", [])) == 0:
         raise ValueError("At least one read library is required to estimate metaSPAdes requirements!")
-    if use_defaults:
-        return {
-            "cpus": 16,
-            "memory": 4096,
-            "walltime": 300
-        }
 
     ws_name = params.get("workspace_name")
     reads_refs = []
     for lib_name in params["read_libraries"]:
         reads_refs.append({"ref": lib_name if "/" in lib_name else ws_name + "/" + lib_name})
     reads_infos = ws.get_object_info3({
-        "objects": reads_refs, 
+        "objects": reads_refs,
         "includeMetadata": 1
     })
 
@@ -55,7 +49,7 @@ def estimate_metaSPAdes_reqs(params, ws, use_defaults=False):
     # now we have an approximation of how many kmers there are. we can use
     # that to guesstimate how much memory we need
 
-    predicted_mem = (total_kmers * 2.962e-08 + 16.3) * 1.1 * 1024 
+    predicted_mem = (total_kmers * 2.962e-08 + 16.3) * 1.1 * 1024
 
     est = {
         "cpus": 16,

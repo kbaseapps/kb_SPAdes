@@ -34,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  *                  (all values must be odd, less than 128 and listed in ascending order)
  *                  In the absence of these values, K values are automatically selected.
  * min_contig_length - integer to filter out contigs with length < min_contig_length
- *                  from the HybridSPAdes output. Default value is 0 implying no filter.    
+ *                  from the HybridSPAdes output. Default value is 0 implying no filter.
  * @optional dna_source
  * @optional pipeline_options
  * @optional kmer_sizes

@@ -45,12 +45,12 @@ class SimpleMockWs():
     def __init__(self, *args, **kwargs):
         self.ws_mapping = dict()
         self.skip_even_meta = kwargs.get("skip_even_meta", False)
-    
+
     def get_object_info3(self, params):
         ret_val = {
             "infos": [],
             "paths": []
-        }        
+        }
         for o in params["objects"]:
             self._setup_ids(o)
             ret_val["infos"].append(self._object_info(o, with_meta=params.get("includeMetadata", 0)==1))
@@ -81,7 +81,7 @@ class SimpleMockWs():
             str(self.ws_mapping[ws_name]['objects'][obj_name]),
             "1"
         ])
-    
+
     def _object_info(self, obj, with_meta=False):
         ws_name, obj_name = obj["ref"].split("/")[:2]
         ws_id = self.ws_mapping[ws_name]["id"]
@@ -132,11 +132,6 @@ class SpadesEstimatorTestCase(unittest.TestCase):
         self.assertEqual(est["cpus"], 16)
         self.assertEqual(est["walltime"], 300)
         self.assertEqual(est["memory"], 18453)
-    
-    def test_estimator_defaults(self):
-        ws = SimpleMockWs()
-        estimates = estimate_metaSPAdes_reqs(self.simple_params, ws, use_defaults=True)
-        self.assertEqual(estimates, {"cpus": 16, "memory": 4096, "walltime": 300})
 
     def test_estimator_bad_inputs(self):
         ws = SimpleMockWs()
@@ -158,23 +153,10 @@ class SpadesEstimatorTestCase(unittest.TestCase):
         self.assertEqual(est["cpus"], 16)
         self.assertEqual(est["walltime"], 300)
         self.assertEqual(est["memory"], 18453)
-    
+
     @mock.patch('kb_SPAdes.kb_SPAdesImpl.Workspace', SimpleMockWs)
     def test_estimator_impl_simple(self):
-        est = self.serviceImpl.estimate_metaSPAdes_requirements(self.ctx, {
-            "params": self.simple_params,
-            "use_defaults": 0
-        })[0]
+        est = self.serviceImpl.estimate_metaSPAdes_requirements(self.ctx, self.simple_params)[0]
         self.assertEqual(est["cpus"], 16)
         self.assertEqual(est["walltime"], 300)
         self.assertEqual(est["memory"], 18453)
-
-    @mock.patch('kb_SPAdes.kb_SPAdesImpl.Workspace', SimpleMockWs)
-    def test_estimator_impl_defaults(self):
-        est = self.serviceImpl.estimate_metaSPAdes_requirements(self.ctx, {
-            "params": self.simple_params,
-            "use_defaults": 1
-        })[0]
-        self.assertEqual(est["cpus"], 16)
-        self.assertEqual(est["walltime"], 300)
-        self.assertEqual(est["memory"], 4096)

@@ -469,11 +469,8 @@ Run SPAdes on paired end libraries for metagenomes
 =begin html
 
 <pre>
-$params is a kb_SPAdes.MetaSPAdesEstimatorParams
+$params is a kb_SPAdes.SPAdesParams
 $results is a kb_SPAdes.MetaSPAdesEstimate
-MetaSPAdesEstimatorParams is a reference to a hash where the following keys are defined:
-	params has a value which is a kb_SPAdes.SPAdesParams
-	use_defaults has a value which is an int
 SPAdesParams is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a string
 	output_contigset_name has a value which is a string
@@ -495,11 +492,8 @@ MetaSPAdesEstimate is a reference to a hash where the following keys are defined
 
 =begin text
 
-$params is a kb_SPAdes.MetaSPAdesEstimatorParams
+$params is a kb_SPAdes.SPAdesParams
 $results is a kb_SPAdes.MetaSPAdesEstimate
-MetaSPAdesEstimatorParams is a reference to a hash where the following keys are defined:
-	params has a value which is a kb_SPAdes.SPAdesParams
-	use_defaults has a value which is an int
 SPAdesParams is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a string
 	output_contigset_name has a value which is a string
@@ -924,7 +918,7 @@ kmer_sizes - (optional) K-mer sizes, Default values: 21, 33, 55, 77, 99, 127
                  (all values must be odd, less than 128 and listed in ascending order)
                  In the absence of these values, K values are automatically selected.
 min_contig_length - integer to filter out contigs with length < min_contig_length
-                 from the HybridSPAdes output. Default value is 0 implying no filter.    
+                 from the HybridSPAdes output. Default value is 0 implying no filter.
 @optional dna_source
 @optional pipeline_options
 @optional kmer_sizes
@@ -1003,45 +997,6 @@ report_ref has a value which is a string
 a reference to a hash where the following keys are defined:
 report_name has a value which is a string
 report_ref has a value which is a string
-
-
-=end text
-
-=back
-
-
-
-=head2 MetaSPAdesEstimatorParams
-
-=over 4
-
-
-
-=item Description
-
-params - the params used to run metaSPAdes.
-use_defaults - (optional, def 0) if 1, just return the default requirements
-use_heuristic - (optional, def 1) if 1, only use a heuristic based on the reads metadata to perform estimates
-
-
-=item Definition
-
-=begin html
-
-<pre>
-a reference to a hash where the following keys are defined:
-params has a value which is a kb_SPAdes.SPAdesParams
-use_defaults has a value which is an int
-
-</pre>
-
-=end html
-
-=begin text
-
-a reference to a hash where the following keys are defined:
-params has a value which is a kb_SPAdes.SPAdesParams
-use_defaults has a value which is an int
 
 
 =end text

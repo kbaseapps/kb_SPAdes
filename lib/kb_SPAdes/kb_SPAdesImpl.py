@@ -55,9 +55,9 @@ A coverage cutoff is not specified.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.2.3"
+    VERSION = "1.3.0"
     GIT_URL = "https://github.com/briehl/kb_SPAdes"
-    GIT_COMMIT_HASH = "17687df25126cf201693f5686224b4777de36f0b"
+    GIT_COMMIT_HASH = "6f13deac910c9796ce8fc0d39075880f74c1ff4e"
 
     #BEGIN_CLASS_HEADER
     # Class variables and functions can be defined in this block
@@ -821,15 +821,10 @@ A coverage cutoff is not specified.
 
     def estimate_metaSPAdes_requirements(self, ctx, params):
         """
-        :param params: instance of type "MetaSPAdesEstimatorParams" (params -
-           the params used to run metaSPAdes. use_defaults - (optional, def
-           0) if 1, just return the default requirements use_heuristic -
-           (optional, def 1) if 1, only use a heuristic based on the reads
-           metadata to perform estimates) -> structure: parameter "params" of
-           type "SPAdesParams" (Input parameters for running SPAdes.
-           workspace_name - the name of the workspace from which to take
-           input and store output. output_contigset_name - the name of the
-           output contigset read_libraries - a list of Illumina
+        :param params: instance of type "SPAdesParams" (Input parameters for
+           running SPAdes. workspace_name - the name of the workspace from
+           which to take input and store output. output_contigset_name - the
+           name of the output contigset read_libraries - a list of Illumina
            PairedEndLibrary files in FASTQ or BAM format. dna_source -
            (optional) the source of the DNA used for sequencing
            'single_cell': DNA amplified from a single cell via MDA anything
@@ -849,7 +844,7 @@ A coverage cutoff is not specified.
            "dna_source" of String, parameter "min_contig_length" of Long,
            parameter "kmer_sizes" of list of Long, parameter
            "skip_error_correction" of type "bool" (A boolean. 0 = false,
-           anything else = true.), parameter "use_defaults" of Long
+           anything else = true.)
         :returns: instance of type "MetaSPAdesEstimate" (cpus - the number of
            CPUs required for the run memory - the minimal amount of memory in
            MB required for the run walltime - an estimate for walltime in
@@ -860,7 +855,7 @@ A coverage cutoff is not specified.
         # return variables are: results
         #BEGIN estimate_metaSPAdes_requirements
         ws = Workspace(self.workspaceURL, token=ctx["token"])
-        results = estimate_metaSPAdes_reqs(params["params"], ws, use_defaults=params.get("use_defaults", 0)==1)
+        results = estimate_metaSPAdes_reqs(params, ws)
         #END estimate_metaSPAdes_requirements
 
         # At some point might do deeper type checking...
