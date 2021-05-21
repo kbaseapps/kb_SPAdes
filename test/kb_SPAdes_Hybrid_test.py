@@ -15,6 +15,7 @@ import requests
 from installed_clients.AbstractHandleClient import AbstractHandle as HandleService
 from kb_SPAdes.kb_SPAdesImpl import kb_SPAdes
 from installed_clients.ReadsUtilsClient import ReadsUtils
+from installed_clients.DataFileUtilClient import DataFileUtil
 from kb_SPAdes.kb_SPAdesServer import MethodContext
 from installed_clients.WorkspaceClient import Workspace
 from kb_SPAdes.utils.spades_assembler import SPAdesAssembler
@@ -69,6 +70,7 @@ class hybrid_SPAdesTest(unittest.TestCase):
         cls.serviceImpl = kb_SPAdes(cls.cfg)
 
         cls.readUtilsImpl = ReadsUtils(cls.callbackURL, token=cls.token)
+        cls.dfu = DataFileUtil(cls.callbackURL, token=cls.token)
         cls.staged = {}
         cls.nodes_to_delete = []
         cls.handles_to_delete = []
@@ -105,57 +107,25 @@ class hybrid_SPAdesTest(unittest.TestCase):
                         allow_redirects=True)
         print('Deleted shock node ' + node_id)
 
-    # Helper script borrowed from the transform service, logger removed
-    @classmethod
-    def upload_file_to_shock(cls, file_path):
-        """
-        Use HTTP multi-part POST to save a file to a SHOCK instance.
-        """
-
-        header = dict()
-        header["Authorization"] = "Oauth {0}".format(cls.token)
-
-        if file_path is None:
-            raise Exception("No file given for upload to SHOCK!")
-
-        with open(os.path.abspath(file_path), 'rb') as dataFile:
-            files = {'upload': dataFile}
-            print('POSTing data')
-            response = requests.post(
-                cls.shockURL + '/node', headers=header, files=files,
-                stream=True, allow_redirects=True)
-            print('got response')
-
-        if not response.ok:
-            response.raise_for_status()
-
-        result = response.json()
-
-        if result['error']:
-            raise Exception(result['error'][0])
-        else:
-            return result["data"]
-
     @classmethod
     def upload_file_to_shock_and_get_handle(cls, test_file):
         '''
         Uploads the file in test_file to shock and returns the node and a
         handle to the node.
         '''
+        test_file_copy = shutil.copy2(test_file, cls.scratch)
         print('loading file to shock: ' + test_file)
-        node = cls.upload_file_to_shock(test_file)
-        pprint(node)
-        cls.nodes_to_delete.append(node['id'])
+        node = cls.dfu.file_to_shock({
+            'file_path': test_file_copy,
+            'make_handle': 1})
+        cls.nodes_to_delete.append(node['shock_id'])
 
-        print('creating handle for shock id ' + node['id'])
-        handle_id = cls.hs.persist_handle({'id': node['id'],
-                                           'type': 'shock',
-                                           'url': cls.shockURL
-                                           })
+        print('creating handle for shock id ' + node['shock_id'])
+        handle_id = node['handle']['hid']
         cls.handles_to_delete.append(handle_id)
 
-        md5 = node['file']['checksum']['md5']
-        return node['id'], handle_id, md5, node['file']['size']
+        md5 = node['handle']['remote_md5']
+        return node['shock_id'], handle_id, md5, node['size']
 
     @classmethod
     def upload_reads(cls, wsobjname, object_body, fwd_reads,
