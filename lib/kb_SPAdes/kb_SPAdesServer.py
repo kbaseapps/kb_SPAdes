@@ -16,7 +16,7 @@ from biokbase import log
 import requests as _requests
 import random as _random
 import os
-from kb_SPAdes.authclient import KBaseAuth as _KBaseAuth
+from installed_clients.authclient import KBaseAuth as _KBaseAuth
 
 DEPLOY = 'KB_DEPLOYMENT_CONFIG'
 SERVICE = 'KB_SERVICE_NAME'
@@ -337,6 +337,14 @@ class Application(object):
                              name='kb_SPAdes.run_SPAdes',
                              types=[dict])
         self.method_authentication['kb_SPAdes.run_SPAdes'] = 'required'  # noqa
+        self.rpc_service.add(impl_kb_SPAdes.run_HybridSPAdes,
+                             name='kb_SPAdes.run_HybridSPAdes',
+                             types=[dict])
+        self.method_authentication['kb_SPAdes.run_HybridSPAdes'] = 'required'  # noqa
+        self.rpc_service.add(impl_kb_SPAdes.run_metaSPAdes,
+                             name='kb_SPAdes.run_metaSPAdes',
+                             types=[dict])
+        self.method_authentication['kb_SPAdes.run_metaSPAdes'] = 'required'  # noqa
         self.rpc_service.add(impl_kb_SPAdes.status,
                              name='kb_SPAdes.status',
                              types=[dict])

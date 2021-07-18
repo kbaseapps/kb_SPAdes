@@ -1,32 +1,30 @@
-FROM kbase/kbase:sdkbase.latest
+FROM kbase/sdkbase2:python
 MAINTAINER KBase Developer
 # -----------------------------------------
+# In this section, you can install any system dependencies required
+# to run your App.  For instance, you could place an apt-get update or
+# install line here, a git checkout to download code, or run any other
+# installation scripts.
 
-# Insert apt-get instructions here to install
-# any required dependencies for your module.
+RUN echo "start building docker image"
 
-# RUN apt-get update
-RUN pip install --upgrade pip
+RUN apt-get update \
+    && apt-get -y install python3-dev \
+    && apt-get -y install wget \
+    && apt-get -y install gcc
+
+RUN pip install --upgrade pip \
+    && pip3 install psutil \
+    && python --version
+
+ENV SPADES_VERSION='3.13.0'
 
 RUN cd /opt \
-    && wget http://spades.bioinf.spbau.ru/release3.11.1/SPAdes-3.11.1-Linux.tar.gz \
-    && tar -xvzf SPAdes-3.11.1-Linux.tar.gz \
-    && rm SPAdes-3.11.1-Linux.tar.gz \
-    && pip install psutil \
-    && pip install pyyaml
+    && wget http://cab.spbu.ru/files/release${SPADES_VERSION}/SPAdes-${SPADES_VERSION}-Linux.tar.gz \
+    && tar -xvzf SPAdes-${SPADES_VERSION}-Linux.tar.gz \
+    && rm SPAdes-${SPADES_VERSION}-Linux.tar.gz
 
-RUN apt-get -y update && apt-get install -y python-dev libffi-dev libssl-dev
-RUN pip install cffi --upgrade
-RUN pip install pyopenssl --upgrade
-RUN pip install ndg-httpsclient --upgrade
-RUN pip install pyasn1 --upgrade
-
-RUN pip install requests --upgrade \
-    && pip install 'requests[security]' --upgrade \
-    && pip install ipython \
-    && apt-get install nano
-
-ENV PATH $PATH:/opt/SPAdes-3.11.1-Linux/bin
+ENV PATH $PATH:/opt/SPAdes-${SPADES_VERSION}-Linux/bin
 
 # -----------------------------------------
 

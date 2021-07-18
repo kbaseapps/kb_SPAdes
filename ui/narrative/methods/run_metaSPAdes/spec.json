@@ -18,7 +18,7 @@
             "default_values": [ "" ],
             "field_type": "text",
             "text_options": {
-                "valid_ws_types": ["KBaseFile.PairedEndLibrary", "KBaseAssembly.PairedEndLibrary", "KBaseFile.SingleEndLibrary", "KBaseAssembly.SingleEndLibrary"]
+                "valid_ws_types": ["KBaseFile.PairedEndLibrary", "KBaseAssembly.PairedEndLibrary"]
             }
         },
         {
@@ -73,7 +73,7 @@
         "service-mapping": {
             "url": "",
             "name": "kb_SPAdes",
-            "method": "run_SPAdes",
+            "method": "run_metaSPAdes",
             "input_mapping": [
                 {
                     "narrative_system_variable": "workspace",

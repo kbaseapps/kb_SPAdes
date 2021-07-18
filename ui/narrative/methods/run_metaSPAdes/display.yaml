@@ -1,7 +1,7 @@
 #
 # define display information
 #
-name: Assemble with metaSPAdes - v3.11.1
+name: Assemble Reads with metaSPAdes - v3.13.0
 tooltip: |
     Assemble metagenomic reads using the SPAdes assembler.
 screenshots: []
@@ -31,62 +31,56 @@ parameters :
         ui-name : |
             Read library
         short-hint : |
-            The libraries of reads to be assembled
+            The libraries of reads to assemble.
+
     output_contigset_name :
         ui-name : |
             Output ContigSet
         short-hint : |
-            The name under which the resulting ContigSet will be saved in the Narrative
+            The name under which the resulting ContigSet will be saved in the Narrative.
+
     min_contig_length :
         ui-name : |
             Minimum Contig Length
         short-hint : |
-            The shortest contig to accept in the resulting assembly object
+            The shortest contig to accept in the resulting assembly object.
+
     kmer_sizes :
         ui-name : |
             K-mer Sizes
         short-hint : |
-            K-mer sizes, Default values: 33, 55, 77, 99, 127 (all values must be odd, less than 128 and
-            listed in ascending order). In the absence of these values, K values are automatically selected.
+            The default values for K-mer sizes are 33, 55, 77, 99, and 127. In the absence of these values, K-mer sizes are automatically selected. Note that all values must be odd, less than 128, and listed in ascending order.
+
     skip_error_correction :
         ui-name : |
             Assembly only (No Error Correction)
         short-hint : |
-            Assembly only (No Error Correction)
+            Assembly only (No Error Correction).
 
 description : |
-    <p>
-    This is a KBase wrapper for the 
-    <a href="http://bioinf.spbau.ru/spades" target="_blank">metaSPAdes</a> 
-    genomic reads assembler.
-    </p>
-    
-    <p>
-    metaSPAdes is designed for assembling shotgun metagenomic reads. 
+    <p>This is a KBase wrapper for the <a href="http://cab.spbu.ru/software/spades/" target="_blank">metaSPAdes</a> genomic reads assembler. MetaSPAdes is designed for assembling shotgun metagenomic reads.</p>
+
+    <p><b>Operational notes:</b>
+    <ul>
+      <li>Currently the wrapper only supports Illumina, IonTorrent, PacBIO CLR and PacBIO CCS in FASTQ format, either uncompressed or gzipped.</li>
+      <li>The --careful flag is always used, except for metagenomic assemblies where it is not allowed.</li>
+      <li>Metagenome and Plasmid assembly can only be run on one reads library.</li>
+      <li>Metagenome assembly can only be run on a paired end library.</li>
+      <li>Illumina and IonTorrent reads can not be mixed in the same assembly.</li>
+      <li>PacBIO CLR needs to be run with at least one accompanying Illumina or IonTorrent library.</li>
+      <li>The k-mer parameter is autodetected by SPAdes, if the values are not specified in input.</li>
+      <li>The PHRED parameter is autodetected by ea-utils.</li>
+      <li>metaSPAdes might be very sensitive to the presence of the technical sequences remaining in the data (most notably adapter sequence regions), hence the authors recommend that you run quality control and pre-process your data prior to assembly. KBase has multiple Apps such as <a href=”https://narrative.kbase.us/#catalog/apps/kb_trimmomatic/run_trimmomatic/release”>Trimmomatic</a> and <a href=”https://narrative.kbase.us/#catalog/apps/kb_cutadapt/remove_adapters/release”>Cutadapt</a> that can be used for sequence cleaning.</li>
+    </ul>
     </p>
 
-    <p>
-    Operational notes:
-    <ul>
-        <li> Currently the wrapper only supports Illumina, IonTorrent, PacBIO CLR and PacBIO CCS
-             in FASTQ format, either uncompressed or gzipped.</li>
-        <li> The --careful flag is always used, except for metagenomic
-             assemblies where it is not allowed.</li>
-        <li> Metagenome and Plasmid assembly can only be run on one reads library.</li>
-        <li> Metagenome assembly can only be run on a paired end library.</li>
-        <li> Illumina and IonTorrent reads can not be mixed in the same assembly.</li>
-        <li> PacBIO CLR needs to be run with at least one accompanying Illumina or IonTorrent library.</li>
-        <li> The k-mer parameter is autodetected by SPAdes, if the values are not specified in input.</li>
-        <li> The PHRED parameter is autodetected by EAUtils.</li>
-    </ul>
-    If you need support for command line options not exposed in the wrapper
-    please contact KBase Help.
-    </p>
-    <p>SPAdes version: 3.11.1</p>
-    
+    <p>For questions, please <a href=”http://kbase.us/contact-us/”>contact us</a>.</p>
+
+    <p>SPAdes version: 3.13.0</p>
+
 publications :
     -
         display-text: |
-            S. Nurk, A. Bankevich, D. Antipov, A. A. Gurevich, A. Korobeynikov, A. Lapidus, A. D. Prjibelsky, A. Pyshkin, A. Sirotkin, Y. Sirotkin, R. Stepanauskas, J. S. McLean, R. Lasken, S. R. Clingenpeel, T. Woyke, G. Tesler, M. A. Alekseyev, and P. A. Pevzner. Assembling Single-Cell Genomes and Mini-Metagenomes From Chimeric MDA Products. Journal of Computational Biology 20(10) (2013), 714-737. doi:10.1089/cmb.2013.0084
-        link: http://www.ncbi.nlm.nih.gov/pubmed/24093227
-        pmid: 24093227
+             Nurk S, Meleshko D, Korobeynikov A, Pevzner PA. metaSPAdes: a new versatile metagenomic assembler. Genome Res. 2017; 27:824–834. doi: 10.1101/gr.213959.116
+        link: https://www.ncbi.nlm.nih.gov/pubmed/28298430
+        pmid: 28298430

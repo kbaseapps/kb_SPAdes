@@ -1,6 +1,6 @@
 /*
-A KBase module: gaprice_SPAdes
-Simple wrapper for the SPAdes assembler.
+A KBase module: kb_SPAdes
+A wrapper for the SPAdes assembler with hybrid features supported.
 http://bioinf.spbau.ru/spades
 
 Always runs in careful mode.
@@ -21,13 +21,11 @@ module kb_SPAdes {
     */
     typedef string paired_end_lib;
 
-
     /* Input parameters for running SPAdes.
-
     workspace_name - the name of the workspace from which to take input
                      and store output.
-    output_contigset_name - the name of the output contigset list<paired_end_lib>
-                     read_libraries - Illumina PairedEndLibrary files to assemble.
+    output_contigset_name - the name of the output contigset
+    read_libraries - a list of Illumina PairedEndLibrary files in FASTQ or BAM format.
     dna_source - (optional) the source of the DNA used for sequencing 'single_cell': DNA
                      amplified from a single cell via MDA anything else: Standard
                      DNA sample from multiple cells. Default value is None.
@@ -50,6 +48,73 @@ module kb_SPAdes {
         bool skip_error_correction;
     } SPAdesParams;
 
+    /* An X/Y/Z style KBase object reference
+    */
+    typedef string obj_ref;
+
+    /* parameter groups--define attributes for specifying inputs with YAML data set file (advanced)
+       The following attributes are available:
+
+            - orientation ("fr", "rf", "ff")
+            - type ("paired-end", "mate-pairs", "hq-mate-pairs", "single", "pacbio", "nanopore", "sanger", "trusted-contigs", "untrusted-contigs")
+            - interlaced reads (comma-separated list of files with interlaced reads)
+            - left reads (comma-separated list of files with left reads)
+            - right reads (comma-separated list of files with right reads)
+            - single reads (comma-separated list of files with single reads or unpaired reads from paired library)
+            - merged reads (comma-separated list of files with merged reads)
+
+    */
+    typedef structure {
+        obj_ref lib_ref;
+        string orientation;
+        string lib_type;
+    } ReadsParams;
+
+    typedef structure {
+        obj_ref long_reads_ref;
+        string long_reads_type;
+    } LongReadsParams;
+
+
+    /*------To run HybridSPAdes 3.13.0 you need at least one library of the following types:------
+    1) Illumina paired-end/high-quality mate-pairs/unpaired reads
+    2) IonTorrent paired-end/high-quality mate-pairs/unpaired reads
+    3) PacBio CCS reads
+    Version 3.13.0 of SPAdes supports paired-end reads, mate-pairs and unpaired reads.
+    SPAdes can take as input several paired-end and mate-pair libraries simultaneously.
+
+    workspace_name - the name of the workspace from which to take input
+                     and store output.
+    output_contigset_name - the name of the output contigset
+    read_libraries - a list of Illumina or IonTorrent paired-end/high-quality mate-pairs/unpaired reads
+    long_reads_libraries - a list of PacBio, Oxford Nanopore Sanger reads and/or additional contigs
+    dna_source - the source of the DNA used for sequencing 'single_cell': DNA
+                     amplified from a single cell via MDA anything else: Standard
+                     DNA sample from multiple cells. Default value is None.
+    pipeline_options - a list of string specifying how the SPAdes pipeline should be run
+    kmer_sizes - (optional) K-mer sizes, Default values: 21, 33, 55, 77, 99, 127
+                     (all values must be odd, less than 128 and listed in ascending order)
+                     In the absence of these values, K values are automatically selected.
+    min_contig_length - integer to filter out contigs with length < min_contig_length
+                     from the HybridSPAdes output. Default value is 0 implying no filter.    
+    @optional dna_source
+    @optional pipeline_options
+    @optional kmer_sizes
+    @optional min_contig_length
+    */
+
+    typedef structure {
+        string workspace_name;
+        string output_contigset_name;
+        list<ReadsParams> reads_libraries;
+        list<LongReadsParams> long_reads_libraries;
+
+        string dna_source;
+        list<string> pipeline_options;
+        list<int> kmer_sizes;
+        int min_contig_length;
+        bool create_report;
+    } HybridSPAdesParams;
 
     /* Output parameters for SPAdes run.
 
@@ -65,4 +130,13 @@ module kb_SPAdes {
     /* Run SPAdes on paired end libraries */
     funcdef run_SPAdes(SPAdesParams params) returns(SPAdesOutput output)
         authentication required;
+
+    /* Run HybridSPAdes on paired end libraries with PacBio CLR and Oxford Nanopore reads*/
+    funcdef run_HybridSPAdes(HybridSPAdesParams params) returns(SPAdesOutput output)
+        authentication required;
+
+    /* Run SPAdes on paired end libraries for metagenomes */
+    funcdef run_metaSPAdes(SPAdesParams params) returns(SPAdesOutput output)
+        authentication required;
 };
+

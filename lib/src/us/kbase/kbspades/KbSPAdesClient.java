@@ -16,8 +16,8 @@ import us.kbase.common.service.UnauthorizedException;
 /**
  * <p>Original spec-file module name: kb_SPAdes</p>
  * <pre>
- * A KBase module: gaprice_SPAdes
- * Simple wrapper for the SPAdes assembler.
+ * A KBase module: kb_SPAdes
+ * A wrapper for the SPAdes assembler with hybrid features supported.
  * http://bioinf.spbau.ru/spades
  * Always runs in careful mode.
  * Runs 3 threads / CPU.
@@ -184,6 +184,42 @@ public class KbSPAdesClient {
         args.add(params);
         TypeReference<List<SPAdesOutput>> retType = new TypeReference<List<SPAdesOutput>>() {};
         List<SPAdesOutput> res = caller.jsonrpcCall("kb_SPAdes.run_SPAdes", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: run_HybridSPAdes</p>
+     * <pre>
+     * Run HybridSPAdes on paired end libraries with PacBio CLR and Oxford Nanopore reads
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbspades.HybridSPAdesParams HybridSPAdesParams}
+     * @return   parameter "output" of type {@link us.kbase.kbspades.SPAdesOutput SPAdesOutput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public SPAdesOutput runHybridSPAdes(HybridSPAdesParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<SPAdesOutput>> retType = new TypeReference<List<SPAdesOutput>>() {};
+        List<SPAdesOutput> res = caller.jsonrpcCall("kb_SPAdes.run_HybridSPAdes", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: run_metaSPAdes</p>
+     * <pre>
+     * Run SPAdes on paired end libraries for metagenomes
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbspades.SPAdesParams SPAdesParams}
+     * @return   parameter "output" of type {@link us.kbase.kbspades.SPAdesOutput SPAdesOutput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public SPAdesOutput runMetaSPAdes(SPAdesParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<SPAdesOutput>> retType = new TypeReference<List<SPAdesOutput>>() {};
+        List<SPAdesOutput> res = caller.jsonrpcCall("kb_SPAdes.run_metaSPAdes", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 

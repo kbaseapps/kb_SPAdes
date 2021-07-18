@@ -5,26 +5,24 @@ from __future__ import print_function
 import os
 import re
 import uuid
-from pprint import pformat, pprint
-from biokbase.workspace.client import Workspace as workspaceService  # @UnresolvedImport @IgnorePep8
 import requests
 import json
 import psutil
 import subprocess
-# import hashlib
 import numpy as np
 import yaml
-# from gaprice_SPAdes_test.GenericClient import GenericClient, ServerError
-# from gaprice_SPAdes_test.kbdynclient import KBDynClient, ServerError
-from ReadsUtils.ReadsUtilsClient import ReadsUtils  # @IgnorePep8
-from ReadsUtils.baseclient import ServerError
-from AssemblyUtil.AssemblyUtilClient import AssemblyUtil
-from KBaseReport.KBaseReportClient import KBaseReport
-# from KBaseReport.baseclient import ServerError as _RepError
-from kb_quast.kb_quastClient import kb_quast
-# from kb_quast.baseclient import ServerError as QUASTError
-from kb_ea_utils.kb_ea_utilsClient import kb_ea_utils
 import time
+from pprint import pformat
+
+from installed_clients.WorkspaceClient import Workspace
+from installed_clients.ReadsUtilsClient import ReadsUtils  # @IgnorePep8
+from installed_clients.baseclient import ServerError
+from installed_clients.AssemblyUtilClient import AssemblyUtil
+from installed_clients.KBaseReportClient import KBaseReport
+from installed_clients.kb_quastClient import kb_quast
+from installed_clients.kb_ea_utilsClient import kb_ea_utils
+
+from kb_SPAdes.utils.spades_assembler import SPAdesAssembler
 
 
 class ShockException(Exception):
@@ -40,11 +38,11 @@ class kb_SPAdes:
 
     Module Description:
     A KBase module: kb_SPAdes
-Simple wrapper for the SPAdes assembler.
+A wrapper for the SPAdes assembler with hybrid features supported.
 http://bioinf.spbau.ru/spades
 
 Always runs in careful mode.
-Runs 3 threads / CPU (maximum of 64).
+Runs 3 threads / CPU.
 Maximum memory use is set to available memory - 1G.
 Autodetection is used for the PHRED quality offset and k-mer sizes.
 A coverage cutoff is not specified.
@@ -56,9 +54,9 @@ A coverage cutoff is not specified.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.1.1"
-    GIT_URL = "https://github.com/kbaseapps/kb_SPAdes.git"
-    GIT_COMMIT_HASH = "e3b02ff7e155b20a51c390fcbc306f5a043467d8"
+    VERSION = "1.2.0"
+    GIT_URL = "https://github.com/qzzhang/kb_SPAdes"
+    GIT_COMMIT_HASH = "5b7e88d6993728abc26c93cfef780ee7feb16c63"
 
     #BEGIN_CLASS_HEADER
     # Class variables and functions can be defined in this block
@@ -230,7 +228,7 @@ A coverage cutoff is not specified.
             os.makedirs(tmpdir)
 
         cmd = ['spades.py', '--threads', str(threads),
-               '--memory', str(mem), '-o', outdir, '--tmp-dir', tmpdir]
+               '--memory', str(int(mem)), '-o', outdir, '--tmp-dir', tmpdir]
 
         print("THE DNA SOURCE IS : " + str(dna_source))
         if dna_source == self.PARAM_IN_SINGLE_CELL:
@@ -508,9 +506,6 @@ A coverage cutoff is not specified.
                 raise ValueError('min_contig_length must be of type int')
         if self.PARAM_IN_KMER_SIZES in params and params[self.PARAM_IN_KMER_SIZES] is not None:
             print("KMER_SIZES: " + ",".join(str(num) for num in params[self.PARAM_IN_KMER_SIZES]))
-            if len(params[self.PARAM_IN_KMER_SIZES]) < 3:
-                raise ValueError('Insufficient number of k-mer sizes: Expected atleast 3 values: ' +
-                                 ",".join(str(num) for num in params[self.PARAM_IN_KMER_SIZES]))
         if self.PARAM_IN_SKIP_ERR_CORRECT in params and params[self.PARAM_IN_SKIP_ERR_CORRECT] is not None:
             print("SKIP ERR CORRECTION: " + str(params[self.PARAM_IN_SKIP_ERR_CORRECT]))
 
@@ -521,7 +516,9 @@ A coverage cutoff is not specified.
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
         self.cfg = config
-        self.callbackURL = os.environ['SDK_CALLBACK_URL']
+        self.cfg['SDK_CALLBACK_URL'] = os.environ['SDK_CALLBACK_URL']
+        self.cfg['KB_AUTH_TOKEN'] = os.environ['KB_AUTH_TOKEN']
+        self.callbackURL = self.cfg['SDK_CALLBACK_URL']
         self.log('Callback URL: ' + self.callbackURL)
         self.workspaceURL = config[self.URL_WS]
         self.shockURL = config[self.URL_SHOCK]
@@ -532,25 +529,34 @@ A coverage cutoff is not specified.
         #END_CONSTRUCTOR
         pass
 
+
     def run_SPAdes(self, ctx, params):
         """
         Run SPAdes on paired end libraries
         :param params: instance of type "SPAdesParams" (Input parameters for
            running SPAdes. workspace_name - the name of the workspace from
            which to take input and store output. output_contigset_name - the
-           name of the output contigset list<paired_end_lib> read_libraries -
-           Illumina PairedEndLibrary files to assemble. dna_source -
+           name of the output contigset read_libraries - a list of Illumina
+           PairedEndLibrary files in FASTQ or BAM format. dna_source -
            (optional) the source of the DNA used for sequencing
            'single_cell': DNA amplified from a single cell via MDA anything
            else: Standard DNA sample from multiple cells. Default value is
            None. min_contig_length - (optional) integer to filter out contigs
            with length < min_contig_length from the SPAdes output. Default
-           value is 0 implying no filter.) -> structure: parameter
+           value is 0 implying no filter. kmer_sizes - (optional) K-mer
+           sizes, Default values: 33, 55, 77, 99, 127 (all values must be
+           odd, less than 128 and listed in ascending order) In the absence
+           of these values, K values are automatically selected.
+           skip_error_correction - (optional) Assembly only (No error
+           correction). By default this is disabled.) -> structure: parameter
            "workspace_name" of String, parameter "output_contigset_name" of
            String, parameter "read_libraries" of list of type
            "paired_end_lib" (The workspace object name of a PairedEndLibrary
            file, whether of the KBaseAssembly or KBaseFile type.), parameter
-           "dna_source" of String, parameter "min_contig_length" of Long
+           "dna_source" of String, parameter "min_contig_length" of Long,
+           parameter "kmer_sizes" of list of Long, parameter
+           "skip_error_correction" of type "bool" (A boolean. 0 = false,
+           anything else = true.)
         :returns: instance of type "SPAdesOutput" (Output parameters for
            SPAdes run. report_name - the name of the KBaseReport.Report
            workspace object. report_ref - the workspace reference of the
@@ -576,7 +582,7 @@ A coverage cutoff is not specified.
         obj_ids = []
         for r in params[self.PARAM_IN_LIB]:
             obj_ids.append({'ref': r if '/' in r else (wsname + '/' + r)})
-        ws = workspaceService(self.workspaceURL, token=token)
+        ws = Workspace(self.workspaceURL, token=token)
         ws_info = ws.get_object_info_new({'objects': obj_ids})
         reads_params = []
 
@@ -690,6 +696,127 @@ A coverage cutoff is not specified.
         # return the results
         return [output]
 
+    def run_HybridSPAdes(self, ctx, params):
+        """
+        Run HybridSPAdes on paired end libraries with PacBio CLR and Oxford Nanopore reads
+        :param params: instance of type "HybridSPAdesParams" (------To run
+           HybridSPAdes 3.13.0 you need at least one library of the following
+           types:------ 1) Illumina paired-end/high-quality
+           mate-pairs/unpaired reads 2) IonTorrent paired-end/high-quality
+           mate-pairs/unpaired reads 3) PacBio CCS reads Version 3.13.0 of
+           SPAdes supports paired-end reads, mate-pairs and unpaired reads.
+           SPAdes can take as input several paired-end and mate-pair
+           libraries simultaneously. workspace_name - the name of the
+           workspace from which to take input and store output.
+           output_contigset_name - the name of the output contigset
+           read_libraries - a list of Illumina or IonTorrent
+           paired-end/high-quality mate-pairs/unpaired reads
+           long_reads_libraries - a list of PacBio, Oxford Nanopore Sanger
+           reads and/or additional contigs dna_source - the source of the DNA
+           used for sequencing 'single_cell': DNA amplified from a single
+           cell via MDA anything else: Standard DNA sample from multiple
+           cells. Default value is None. pipeline_options - a list of string
+           specifying how the SPAdes pipeline should be run kmer_sizes -
+           (optional) K-mer sizes, Default values: 21, 33, 55, 77, 99, 127
+           (all values must be odd, less than 128 and listed in ascending
+           order) In the absence of these values, K values are automatically
+           selected. min_contig_length - integer to filter out contigs with
+           length < min_contig_length from the HybridSPAdes output. Default
+           value is 0 implying no filter. @optional dna_source @optional
+           pipeline_options @optional kmer_sizes @optional min_contig_length)
+           -> structure: parameter "workspace_name" of String, parameter
+           "output_contigset_name" of String, parameter "reads_libraries" of
+           list of type "ReadsParams" (parameter groups--define attributes
+           for specifying inputs with YAML data set file (advanced) The
+           following attributes are available: - orientation ("fr", "rf",
+           "ff") - type ("paired-end", "mate-pairs", "hq-mate-pairs",
+           "single", "pacbio", "nanopore", "sanger", "trusted-contigs",
+           "untrusted-contigs") - interlaced reads (comma-separated list of
+           files with interlaced reads) - left reads (comma-separated list of
+           files with left reads) - right reads (comma-separated list of
+           files with right reads) - single reads (comma-separated list of
+           files with single reads or unpaired reads from paired library) -
+           merged reads (comma-separated list of files with merged reads)) ->
+           structure: parameter "lib_ref" of type "obj_ref" (An X/Y/Z style
+           KBase object reference), parameter "orientation" of String,
+           parameter "lib_type" of String, parameter "long_reads_libraries"
+           of list of type "LongReadsParams" -> structure: parameter
+           "long_reads_ref" of type "obj_ref" (An X/Y/Z style KBase object
+           reference), parameter "long_reads_type" of String, parameter
+           "dna_source" of String, parameter "pipeline_options" of list of
+           String, parameter "kmer_sizes" of list of Long, parameter
+           "min_contig_length" of Long, parameter "create_report" of type
+           "bool" (A boolean. 0 = false, anything else = true.)
+        :returns: instance of type "SPAdesOutput" (Output parameters for
+           SPAdes run. report_name - the name of the KBaseReport.Report
+           workspace object. report_ref - the workspace reference of the
+           report.) -> structure: parameter "report_name" of String,
+           parameter "report_ref" of String
+        """
+        # ctx is the context object
+        # return variables are: output
+        #BEGIN run_HybridSPAdes
+        self.log('Running run_HybridSPAdes with params:\n{}'.format(
+                 json.dumps(params, indent=1)))
+
+        spades_assembler = SPAdesAssembler(self.cfg, ctx.provenance())
+
+        output = spades_assembler.run_hybrid_spades(params)
+        #END run_HybridSPAdes
+
+        # At some point might do deeper type checking...
+        if not isinstance(output, dict):
+            raise ValueError('Method run_HybridSPAdes return value ' +
+                             'output is not type dict as required.')
+        # return the results
+        return [output]
+
+    def run_metaSPAdes(self, ctx, params):
+        """
+        Run SPAdes on paired end libraries for metagenomes
+        :param params: instance of type "SPAdesParams" (Input parameters for
+           running SPAdes. workspace_name - the name of the workspace from
+           which to take input and store output. output_contigset_name - the
+           name of the output contigset read_libraries - a list of Illumina
+           PairedEndLibrary files in FASTQ or BAM format. dna_source -
+           (optional) the source of the DNA used for sequencing
+           'single_cell': DNA amplified from a single cell via MDA anything
+           else: Standard DNA sample from multiple cells. Default value is
+           None. min_contig_length - (optional) integer to filter out contigs
+           with length < min_contig_length from the SPAdes output. Default
+           value is 0 implying no filter. kmer_sizes - (optional) K-mer
+           sizes, Default values: 33, 55, 77, 99, 127 (all values must be
+           odd, less than 128 and listed in ascending order) In the absence
+           of these values, K values are automatically selected.
+           skip_error_correction - (optional) Assembly only (No error
+           correction). By default this is disabled.) -> structure: parameter
+           "workspace_name" of String, parameter "output_contigset_name" of
+           String, parameter "read_libraries" of list of type
+           "paired_end_lib" (The workspace object name of a PairedEndLibrary
+           file, whether of the KBaseAssembly or KBaseFile type.), parameter
+           "dna_source" of String, parameter "min_contig_length" of Long,
+           parameter "kmer_sizes" of list of Long, parameter
+           "skip_error_correction" of type "bool" (A boolean. 0 = false,
+           anything else = true.)
+        :returns: instance of type "SPAdesOutput" (Output parameters for
+           SPAdes run. report_name - the name of the KBaseReport.Report
+           workspace object. report_ref - the workspace reference of the
+           report.) -> structure: parameter "report_name" of String,
+           parameter "report_ref" of String
+        """
+        # ctx is the context object
+        # return variables are: output
+        #BEGIN run_metaSPAdes
+
+        output = self.run_SPAdes(ctx,params)[0]
+        #END run_metaSPAdes
+
+        # At some point might do deeper type checking...
+        if not isinstance(output, dict):
+            raise ValueError('Method run_metaSPAdes return value ' +
+                             'output is not type dict as required.')
+        # return the results
+        return [output]
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK",

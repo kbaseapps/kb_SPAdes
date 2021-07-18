@@ -1,0 +1,118 @@
+#
+# define display information
+#
+name: Assemble Reads with HybridSPAdes - v3.13.0
+tooltip: |
+    Assemble reads using the HybridSPAdes assembler.
+screenshots: []
+
+icon: hybridspades-blue.png
+
+#
+# define a set of similar methods that might be useful to the user
+#
+suggestions:
+    apps:
+        related:
+            []
+        next:
+            []
+    methods:
+        related:
+            []
+        next:
+            [annotate_contigset]
+
+#
+# Configure the display and description of parameters
+#
+parameters :
+    lib_ref :
+        ui-name : |
+            Reads library
+        short-hint : |
+            Reads libraries MUST HAVE Illumina/IonTorrent single, paired-end, and/or mate pair reads to use SPAdes.
+
+    orientation:
+        ui-name : |
+            Relative orientation of read-pairs
+        short-hint : |
+            Two letter string for defining the relative orientation of the read pairs. Default is "fr" (forward-reverse) for paired-end libraries and "rf" (reverse-forward) for mate pair libraries.
+    lib_type :
+        ui-name : |
+            Reads type
+        short-hint : |
+            Reads type for defining the reads in the parameter-group reads_libraries. Either "paired-end," "mate-pairs," "hq-mate-pairs," or "single."
+
+    long_reads_ref :
+        ui-name : |
+            Long reads library
+        short-hint : |
+            Long reads libraries for running hybridSPAdes.
+
+    long_reads_type :
+        ui-name : |
+            Long reads type
+        short-hint : |
+            Long reads type for defining the reads in the parameter-group long_reads_libraries. Either "pacbio_ccs," "pacbio_clr," "nanopore," "sanger," "trusted-contigs," or "untrusted-contigs."
+
+    output_contigset_name :
+        ui-name : |
+            Output ContigSet Name
+        short-hint : |
+            The name for the resulting ContigSet that will be saved in KBase.
+
+    min_contig_length :
+        ui-name : |
+            Minimum Contig Length
+        short-hint : |
+            The shortest contig to accept in the resulting assembly object.
+
+    dna_source :
+        ui-name : |
+            dna_source
+        short-hint : |
+            Bacteria or other organisms. This parameter is useful if you have too many Illumina jumping library mates. It sets the limit_jump_coverage to 60 for bacteria and 300 for the other organisms; cgwErrorRate to 0.25 for bacteria and 0.15 for the other organisms.
+
+    pipeline_options :
+        ui-name : |
+            SPAdes pipeline options
+        short-hint : |
+            Options controlling how to run the SPAdes pipeline.
+
+    kmer_sizes :
+        ui-name : |
+            K-mer Sizes
+        short-hint : |
+            Comma-separated list of k-mer sizes to be used. All values must odd, less than 128, and listed in ascending order. If --sc is set, the default values are 21,33,55.
+
+parameter-groups :
+    reads_libraries :
+        ui-name : |
+            Reads libraries to be assembled
+        short-hint : |
+            A group of reads libraries defined as reads_lib, orientation, reads_type.
+
+    long_reads_libraries :
+        ui-name : |
+            Long reads for hybrid assembly
+        short-hint : |
+            A group of long reads libraries defined as long_reads_lib, long_reads_type.
+
+description : |
+    <p>This is a KBase wrapper for <a href="http://cab.spbu.ru/software/spades/"> HYBRIDSPADES: an algorithm for hybrid assembly of short and long reads</a>. This program constructs the assembly graph from short reads using SPAdes, then maps long reads to that assembly graph, using the consensus to close any gaps[2].</p>
+
+    <p>SPAdes – St. Petersburg genome assembler – is an assembly toolkit containing various assembly pipelines. This <a href=”http://cab.spbu.ru/software/spades/”>manual</a> will help you to install and run SPAdes. SPAdes version 3.13.0 was released under GPLv2 on October 11, 2018.</p>
+
+    <p>More information regarding the intricacies of HybridSPAdes can be found in the publications at the bottom of this App detail page.</p>
+
+publications :
+    -
+        display-text : |
+            [1] Nurk S, Bankevich A, Antipov D, Gurevich A, Korobeynikov A, Lapidus A, et al. Assembling Genomes and Mini-metagenomes from Highly Chimeric Reads. In: Deng M, Jiang R, Sun F, Zhang X, editors. Research in Computational Molecular Biology. Springer Berlin Heidelberg; 2013. pp. 158–170.Nurk, Bankevich et al., 2013. doi: 10.1007/978-3-642-37195-0_13
+        link: https://link.springer.com/chapter/10.1007%2F978-3-642-37195-0_13
+
+    -
+        display-text : |
+            [2] Antipov D, Korobeynikov A, McLean J, Pevzner P. HYBRIDSPADES: an algorithm for hybrid assembly of short and long reads. Bioinformatics. 2016;32. 1009-1015. doi: 10.1093/bioinformatics/btv688
+        link: https://academic.oup.com/bioinformatics/article/32/7/1009/1743807

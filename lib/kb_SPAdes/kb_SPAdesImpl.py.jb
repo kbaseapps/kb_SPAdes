@@ -4,24 +4,24 @@
 from __future__ import print_function
 import os
 import re
-# import uuid
-from pprint import pformat
-from biokbase.workspace.client import Workspace as workspaceService  # @UnresolvedImport @IgnorePep8
+import uuid
 import requests
 import json
 import psutil
 import subprocess
-# import hashlib
 import numpy as np
 import yaml
-# from gaprice_SPAdes_test.GenericClient import GenericClient, ServerError
-# from gaprice_SPAdes_test.kbdynclient import KBDynClient, ServerError
-from ReadsUtils.ReadsUtilsClient import ReadsUtils  # @IgnorePep8
-from ReadsUtils.baseclient import ServerError
-from AssemblyUtil.AssemblyUtilClient import AssemblyUtil
-from KBaseReport.KBaseReportClient import KBaseReport
-from kb_ea_utils.kb_ea_utilsClient import kb_ea_utils
 import time
+
+from installed_clients.WorkspaceClient import Workspace
+from installed_clients.ReadsUtilsClient import ReadsUtils  # @IgnorePep8
+from installed_clients.baseclient import ServerError
+from installed_clients.AssemblyUtilClient import AssemblyUtil
+from installed_clients.KBaseReportClient import KBaseReport
+from installed_clients.kb_quastClient import kb_quast
+from installed_clients.kb_ea_utilsClient import kb_ea_utils
+
+from kb_SPAdes.utils.spades_assembler import SPAdesAssembler
 
 
 class ShockException(Exception):

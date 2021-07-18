@@ -4,21 +4,21 @@ import os
 import time
 
 from os import environ
-from ConfigParser import ConfigParser
-import psutil
-
-import requests
-from biokbase.workspace.client import Workspace as workspaceService  # @UnresolvedImport @IgnorePep8
-from biokbase.workspace.client import ServerError as WorkspaceError  # @UnresolvedImport @IgnorePep8
-from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # @UnresolvedImport @IgnorePep8
-from kb_SPAdes.kb_SPAdesImpl import kb_SPAdes
-from ReadsUtils.baseclient import ServerError
-from ReadsUtils.ReadsUtilsClient import ReadsUtils
-from kb_SPAdes.kb_SPAdesServer import MethodContext
+from configparser import ConfigParser
 from pprint import pprint
+
+import psutil
+import requests
 import shutil
 import inspect
-from kb_SPAdes.GenericClient import GenericClient
+
+from installed_clients.AbstractHandleClient import AbstractHandle as HandleService
+from installed_clients.WorkspaceClient import Workspace as workspaceService
+from installed_clients.baseclient import ServerError
+from installed_clients.ReadsUtilsClient import ReadsUtils
+
+from kb_SPAdes.kb_SPAdesImpl import kb_SPAdes
+from kb_SPAdes.kb_SPAdesServer import MethodContext
 
 
 class gaprice_SPAdesTest(unittest.TestCase):
@@ -73,8 +73,9 @@ class gaprice_SPAdesTest(unittest.TestCase):
             for node in cls.nodes_to_delete:
                 cls.delete_shock_node(node)
         if hasattr(cls, 'handles_to_delete'):
-            cls.hs.delete_handles(cls.hs.ids_to_handles(cls.handles_to_delete))
-            print('Deleted handles ' + str(cls.handles_to_delete))
+            if cls.handles_to_delete:
+                cls.hs.delete_handles(cls.hs.hids_to_handles(cls.handles_to_delete))
+                print('Deleted handles ' + str(cls.handles_to_delete))
 
     @classmethod
     def getWsName(cls):
@@ -153,23 +154,23 @@ class gaprice_SPAdesTest(unittest.TestCase):
         ob['wsname'] = cls.getWsName()
         ob['name'] = wsobjname
         if single_end or rev_reads:
-            ob['interleaved']= 0
+            ob['interleaved'] = 0
         else:
-            ob['interleaved']= 1
+            ob['interleaved'] = 1
         print('\n===============staging data for object ' + wsobjname +
               '================')
         print('uploading forward reads file ' + fwd_reads['file'])
         fwd_id, fwd_handle_id, fwd_md5, fwd_size = \
             cls.upload_file_to_shock_and_get_handle(fwd_reads['file'])
 
-        ob['fwd_id']= fwd_id
+        ob['fwd_id'] = fwd_id
         rev_id = None
         rev_handle_id = None
         if rev_reads:
             print('uploading reverse reads file ' + rev_reads['file'])
             rev_id, rev_handle_id, rev_md5, rev_size = \
                 cls.upload_file_to_shock_and_get_handle(rev_reads['file'])
-            ob['rev_id']= rev_id
+            ob['rev_id'] = rev_id
         obj_ref = cls.readUtilsImpl.upload_reads(ob)
         objdata = cls.wsClient.get_object_info_new({
             'objects': [{'ref': obj_ref['obj_ref']}]
@@ -288,8 +289,8 @@ class gaprice_SPAdesTest(unittest.TestCase):
     @classmethod
     def setupTestData(cls):
         print('Shock url ' + cls.shockURL)
-        print('WS url ' + cls.wsClient.url)
-        print('Handle service url ' + cls.hs.url)
+        # print('WS url ' + cls.wsClient.url)
+        # print('Handle service url ' + cls.hs.url)
         print('CPUs detected ' + str(psutil.cpu_count()))
         print('Available memory ' + str(psutil.virtual_memory().available))
         print('staging data')
@@ -328,18 +329,18 @@ class gaprice_SPAdesTest(unittest.TestCase):
         cls.upload_reads('intbasic', {'single_genome': 1}, int_reads)
         cls.upload_reads('intbasic64', {'single_genome': 1}, int64_reads)
         cls.upload_reads('pacbio', {'single_genome': 1},
-                            pacbio_reads, single_end=True, sequencing_tech="PacBio CLR")
+                         pacbio_reads, single_end=True, sequencing_tech="PacBio CLR")
         cls.upload_reads('pacbioccs', {'single_genome': 1},
-                            pacbio_ccs_reads, single_end=True, sequencing_tech="PacBio CCS")
+                         pacbio_ccs_reads, single_end=True, sequencing_tech="PacBio CCS")
         cls.upload_reads('iontorrent', {'single_genome': 1},
-                            iontorrent_reads, single_end=True, sequencing_tech="IonTorrent")
+                         iontorrent_reads, single_end=True, sequencing_tech="IonTorrent")
         cls.upload_reads('meta', {'single_genome': 0}, fwd_reads,
-                            rev_reads=rev_reads)
+                         rev_reads=rev_reads)
         cls.upload_reads('meta2', {'single_genome': 0}, fwd_reads,
-                            rev_reads=rev_reads)
+                         rev_reads=rev_reads)
         cls.upload_reads('meta_single_end', {'single_genome': 0}, fwd_reads, single_end=True)
         cls.upload_reads('reads_out', {'read_orientation_outward': 1},
-                            int_reads)
+                         int_reads)
         cls.upload_assembly('frbasic_kbassy', {}, fwd_reads,
                             rev_reads=rev_reads, kbase_assy=True)
         cls.upload_assembly('intbasic_kbassy', {}, int_reads, kbase_assy=True)
@@ -419,7 +420,7 @@ class gaprice_SPAdesTest(unittest.TestCase):
 
         self.run_success(
             ['intbasic_kbassy'], 'intbasic_kbassy_out',
-            contig_count=1479, dna_source='')
+            contig_count=1476, dna_source='')
 
     def test_multiple(self):
         self.run_success(
@@ -440,7 +441,6 @@ class gaprice_SPAdesTest(unittest.TestCase):
         self.run_success(
             ['single_end', 'single_end2'], 'multiple_single_out',
             dna_source='None')
-
 
     def test_iontorrent_alone(self):
         self.run_non_deterministic_success(
@@ -482,7 +482,7 @@ class gaprice_SPAdesTest(unittest.TestCase):
                         'The following read objects have phred 64 scores : ' +
                         '{}/intbasic64').format(self.getWsName(), self.getWsName()),
                        exception=ValueError)
-    
+
     def test_single_cell(self):
 
         self.run_success(
@@ -492,21 +492,15 @@ class gaprice_SPAdesTest(unittest.TestCase):
     def test_meta_kmer_sizes(self):
 
         self.run_success(
-            ['frbasic'], 'frbasic_out',
+            ['frbasic'], 'frbasic_meta_out',
             contig_count=2, dna_source='metagenomic',
             kmer_sizes=[33, 55, 77, 99, 127])
-
-    def test_invalid_kmer_sizes(self):
-
-        self.run_error(
-            ['frbasic'], 'Insufficient number of k-mer sizes: Expected atleast 3 values: 33',
-            kmer_sizes=[33])
 
     def test_invalid_min_contig_length(self):
 
         self.run_error(
             ['frbasic'], 'min_contig_length must be of type int', min_contig_length='not an int!')
-    
+
     def test_no_workspace_param(self):
 
         self.run_error(
@@ -764,10 +758,10 @@ class gaprice_SPAdesTest(unittest.TestCase):
         self.assertEqual('Assembled contigs',
                          report['data']['objects_created'][0]['description'])
         if not (contig_count):
-          self.assertIn('Assembled into ', report['data']['text_message'])
+            self.assertIn('Assembled into ', report['data']['text_message'])
         else:
-          self.assertIn('Assembled into ' + str(contig_count) +
-                      ' contigs', report['data']['text_message'])
+            self.assertIn('Assembled into ' + str(contig_count) +
+                          ' contigs', report['data']['text_message'])
 
         print("PROVENANCE: " + str(report['provenance']))
         self.assertEqual(1, len(report['provenance']))
@@ -806,43 +800,41 @@ class gaprice_SPAdesTest(unittest.TestCase):
         header = {"Authorization": "Oauth {0}".format(self.token)}
         fasta_node = requests.get(self.shockURL + '/node/' + assembly_fasta_node,
                                   headers=header, allow_redirects=True).json()
-        
+
         if not (contig_count is None):
-          self.assertEqual(contig_count, len(assembly['data']['contigs']))
+            self.assertEqual(contig_count, len(assembly['data']['contigs']))
 
         self.assertEqual(output_name, assembly['data']['assembly_id'])
         # self.assertEqual(output_name, assembly['data']['name']) #name key doesnt seem to exist
-        
+
         if not (expected is None):
-          self.assertEqual(expected['fasta_md5'],
-                         fasta_node['data']['file']['checksum']['md5'])
+            self.assertEqual(expected['fasta_md5'],
+                             fasta_node['data']['file']['checksum']['md5'])
 
-          self.assertEqual(expected['md5'], assembly['data']['md5'])
+            self.assertEqual(expected['md5'], assembly['data']['md5'])
 
-          self.assertIn('Assembled into ' + str(contig_count) +
-                      ' contigs', report['data']['text_message'])
+            self.assertIn('Assembled into ' + str(contig_count) +
+                          ' contigs', report['data']['text_message'])
 
-          for exp_contig in expected['contigs']:
-              if exp_contig['id'] in assembly['data']['contigs']:
-                  obj_contig = assembly['data']['contigs'][exp_contig['id']]
-                  self.assertEqual(exp_contig['name'], obj_contig['name'])
-                  self.assertEqual(exp_contig['md5'], obj_contig['md5'])
-                  self.assertEqual(exp_contig['length'], obj_contig['length'])
-              else:
-                  # Hacky way to do this, but need to see all the contig_ids
-                  # They changed because the SPAdes version changed and
-                  # Need to see them to update the tests accordingly.
-                  # If code gets here this test is designed to always fail, but show results.
-                  self.assertEqual(str(assembly['data']['contigs']), "BLAH")
-
+        for exp_contig in expected['contigs']:
+            if exp_contig['id'] in assembly['data']['contigs']:
+                obj_contig = assembly['data']['contigs'][exp_contig['id']]
+                self.assertEqual(exp_contig['name'], obj_contig['name'])
+                self.assertEqual(exp_contig['md5'], obj_contig['md5'])
+                self.assertEqual(exp_contig['length'], obj_contig['length'])
+            else:
+                # Hacky way to do this, but need to see all the contig_ids
+                # They changed because the SPAdes version changed and
+                # Need to see them to update the tests accordingly.
+                # If code gets here this test is designed to always fail, but show results.
+                self.assertEqual(str(assembly['data']['contigs']), "BLAH")
 
     def run_non_deterministic_success(self, readnames, output_name,
-                    dna_source=None):
+                                      dna_source=None):
 
         test_name = inspect.stack()[1][3]
         print('\n**** starting expected success test: ' + test_name + ' *****')
         print('   libs: ' + str(readnames))
-
         print("READNAMES: " + str(readnames))
         print("STAGED: " + str(self.staged))
 

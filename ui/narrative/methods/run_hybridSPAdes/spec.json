@@ -1,0 +1,310 @@
+{
+    "ver": "1.0.0",
+    "authors": [
+        "qzhang"
+    ],
+    "contact": "http://kbase.us/contact-us/",
+    "categories": ["active", "assembly"],
+    "widgets": {
+        "input": null,
+        "output": "no-display"
+    },
+    "parameters": [ 
+        {
+            "id": "lib_ref",
+            "optional": false,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options": {
+                "valid_ws_types": ["KBaseAssembly.PairedEndLibrary", "KBaseFile.PairedEndLibrary", "KBaseAssembly.SingleEndLibrary", "KBaseFile.SingleEndLibrary"]
+            }
+        },
+        {
+            "id": "orientation",
+            "optional": false,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "fr" ],
+            "field_type": "text",
+            "text_options": {
+                "validate_as": "text"
+            }
+        },
+        {
+            "id": "lib_type",
+            "optional": false,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "single" ],
+            "field_type": "dropdown",
+            "dropdown_options": {
+                "options": [
+                    {
+                      "value": "single",
+                      "display": "single"
+                    },
+                    {
+                     "value": "paired-end",
+                     "display": "paired-end"
+                    },
+                    {
+                      "value": "mate-pairs",
+                      "display": "mate-pairs"
+                    }
+                  ]
+            }
+        },
+        {
+            "id": "long_reads_ref",
+            "optional": false,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options": {
+                "valid_ws_types": ["KBaseGenomes.ContigSet", "KBaseGenomeAnnotations.Assembly", "KBaseAssembly.SingleEndLibrary", "KBaseFile.SingleEndLibrary", "KBaseAssembly.PairedEndLibrary", "KBaseFile.PairedEndLibrary"]
+            }
+        },
+        {
+            "id": "long_reads_type",
+            "optional": false,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "pacbio_ccs" ],
+            "field_type": "dropdown",
+            "dropdown_options": {
+                "options": [
+                    {
+                      "value": "pacbio_ccs",
+                      "display": "pacbio_ccs"
+                    },
+                    {
+                      "value": "pacbio_clr",
+                      "display": "pacbio_clr"
+                    },
+                    {
+                      "value": "nanopore",
+                      "display": "nanopore"
+                    },
+                    {
+                      "value": "sanger",
+                      "display": "sanger"
+                    },
+                    {
+                      "value": "trusted-contigs",
+                      "display": "trusted-contigs"
+                    },
+                    {
+                      "value": "untrusted-contigs",
+                      "display": "untrusted-contigs"
+                    }
+                  ]
+            }
+        },
+        {
+            "id": "dna_source",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": ["standard"],
+            "field_type" : "dropdown",
+            "dropdown_options":{
+            "options": [
+                {
+                    "value": "standard",
+                    "display": "standard"
+                },
+                {
+                  "value": "single_cell",
+                  "display": "single cell"
+                },
+                {
+                  "value": "plasmid",
+                  "display": "plasmid"
+                },
+                {
+                  "value": "metagenomic",
+                  "display": "metagenomic"
+                },
+                {
+                  "value": "rna",
+                  "display": "rna"
+                },
+                {
+                  "value": "iontorrent",
+                  "display": "iontorrent"
+                }
+              ]
+            }
+        },
+        {
+            "id": "pipeline_options",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": true,
+            "default_values": ["careful"],
+            "field_type" : "dropdown",
+            "dropdown_options":{
+            "options": [
+                {
+                  "value": "careful",
+                  "display": "careful"
+                },
+                {
+                  "value": "only-error-correction",
+                  "display": "only-error-correction"
+                },
+                {
+                  "value": "only-assembler",
+                  "display": "only-assembler"
+                },
+                {
+                  "value": "continue",
+                  "display": "continue"
+                },
+                {
+                  "value": "disable-gzip-output",
+                  "display": "disable-gzip-output"
+                }
+              ]
+            }
+        },
+        {
+            "id": "output_contigset_name",
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "default_values": ["spades.contigs"],
+            "field_type": "text",
+            "text_options": {
+                "valid_ws_types" : [ "KBaseGenomeAnnotations.Assembly" ],
+                "is_output_name":true
+            }
+        },
+        {
+            "id": "min_contig_length",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "500" ],
+            "field_type": "text",
+            "text_options": {
+                "validate_as" : "int",
+		        "min_int" : 0
+            }
+        },
+        {
+            "id": "kmer_sizes",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": true,
+            "default_values": [],
+            "field_type": "text",
+            "text_options": {
+                "validate_as" : "int"
+            }
+        }
+    ],
+    "parameter-groups": 
+    [    
+        {
+            "id": "reads_libraries",
+            "optional": false,
+            "allow_multiple": true,
+            "with_border": true,
+            "parameters": [
+                "lib_ref",
+                "orientation",
+                "lib_type"
+            ]
+        },
+        {
+            "id": "long_reads_libraries",
+            "optional": true,
+            "allow_multiple": true,
+            "with_border": true,
+            "parameters": [
+                "long_reads_ref",
+                "long_reads_type"
+            ]
+        }
+    ],
+    "behavior": {
+        "service-mapping": {
+            "url": "",
+            "name":"kb_SPAdes",
+            "method": "run_HybridSPAdes",
+            "input_mapping": [
+                {
+                    "narrative_system_variable": "workspace",
+                    "target_property": "workspace_name"
+                },
+                {
+                    "input_parameter": "reads_libraries",
+                    "target_property": "reads_libraries"
+                },
+                {
+                    "input_parameter": "long_reads_libraries",
+                    "target_property": "long_reads_libraries"
+                },
+                {
+                    "input_parameter": "output_contigset_name",
+                    "target_property": "output_contigset_name"
+                },
+                {
+                    "input_parameter": "min_contig_length",
+                    "target_property": "min_contig_length"
+                },
+                {
+                    "input_parameter": "kmer_sizes",
+                    "target_property": "kmer_sizes"
+                },
+                {
+                    "input_parameter": "dna_source",
+                    "target_property": "dna_source"
+                },
+                {
+                    "input_parameter": "pipeline_options",
+                    "target_property": "pipeline_options"
+                },
+                {
+                    "constant_value": 1,
+                    "target_property": "create_report"
+                }
+            ],
+            "output_mapping": [
+                {
+                    "service_method_output_path": [0,"report_name"],
+                    "target_property": "report_name"
+                },
+                {
+                    "service_method_output_path": [0,"report_ref"],
+                    "target_property": "report_ref"
+                },
+                {
+                    "constant_value": "5",
+                    "target_property": "report_window_line_height"
+                },
+                {
+                    "service_method_output_path": [0],
+                    "target_property": "spades_result"
+                },
+                {
+                    "input_parameter": "output_contigset_name",
+                    "target_property": "input_output_contigset_name"
+                },
+                {
+                    "input_parameter": "dna_source",
+                    "target_property": "input_dna_source"
+                },
+                {
+                    "narrative_system_variable": "workspace",
+                    "target_property": "workspace_name"
+                }
+            ]
+        }
+    },
+    "job_id_output_field": "docker"
+}
