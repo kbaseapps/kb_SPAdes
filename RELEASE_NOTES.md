@@ -4,6 +4,7 @@ __Changes__
 - added github actions tests
 - made unit test data upload via ReadsUtil.upload_reads()
 - fixed broken unit tests
+- completed port from python 2 to 3
 
 ### Version 1.2.5
 __Changes__
