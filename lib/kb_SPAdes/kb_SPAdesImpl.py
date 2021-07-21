@@ -54,9 +54,9 @@ A coverage cutoff is not specified.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.2.0"
-    GIT_URL = "https://github.com/qzzhang/kb_SPAdes"
-    GIT_COMMIT_HASH = "5b7e88d6993728abc26c93cfef780ee7feb16c63"
+    VERSION = "1.3.0"
+    GIT_URL = "https://github.com/kbaseapps/kb_SPAdes"
+    GIT_COMMIT_HASH = "7a8da17a0e5b9e63b7bea65b321fa1b6ff7fe255"
 
     #BEGIN_CLASS_HEADER
     # Class variables and functions can be defined in this block
@@ -700,10 +700,10 @@ A coverage cutoff is not specified.
         """
         Run HybridSPAdes on paired end libraries with PacBio CLR and Oxford Nanopore reads
         :param params: instance of type "HybridSPAdesParams" (------To run
-           HybridSPAdes 3.13.0 you need at least one library of the following
+           HybridSPAdes you need at least one library of the following
            types:------ 1) Illumina paired-end/high-quality
            mate-pairs/unpaired reads 2) IonTorrent paired-end/high-quality
-           mate-pairs/unpaired reads 3) PacBio CCS reads Version 3.13.0 of
+           mate-pairs/unpaired reads 3) PacBio CCS reads Version 3.15.2 of
            SPAdes supports paired-end reads, mate-pairs and unpaired reads.
            SPAdes can take as input several paired-end and mate-pair
            libraries simultaneously. workspace_name - the name of the

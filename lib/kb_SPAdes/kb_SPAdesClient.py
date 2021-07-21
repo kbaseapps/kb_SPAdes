@@ -12,7 +12,7 @@ from __future__ import print_function
 try:
     # baseclient and this client are in a package
     from .baseclient import BaseClient as _BaseClient  # @UnusedImport
-except:
+except ImportError:
     # no they aren't
     from baseclient import BaseClient as _BaseClient  # @Reimport
 
@@ -23,7 +23,7 @@ class kb_SPAdes(object):
             self, url=None, timeout=30 * 60, user_id=None,
             password=None, token=None, ignore_authrc=False,
             trust_all_ssl_certificates=False,
-            auth_svc='https://kbase.us/services/authorization/Sessions/Login'):
+            auth_svc='https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login'):
         if url is None:
             raise ValueError('A url is required')
         self._service_ver = None
@@ -66,18 +66,17 @@ class kb_SPAdes(object):
            report.) -> structure: parameter "report_name" of String,
            parameter "report_ref" of String
         """
-        return self._client.call_method(
-            'kb_SPAdes.run_SPAdes',
-            [params], self._service_ver, context)
+        return self._client.call_method('kb_SPAdes.run_SPAdes',
+                                        [params], self._service_ver, context)
 
     def run_HybridSPAdes(self, params, context=None):
         """
         Run HybridSPAdes on paired end libraries with PacBio CLR and Oxford Nanopore reads
         :param params: instance of type "HybridSPAdesParams" (------To run
-           HybridSPAdes 3.13.0 you need at least one library of the following
+           HybridSPAdes you need at least one library of the following
            types:------ 1) Illumina paired-end/high-quality
            mate-pairs/unpaired reads 2) IonTorrent paired-end/high-quality
-           mate-pairs/unpaired reads 3) PacBio CCS reads Version 3.13.0 of
+           mate-pairs/unpaired reads 3) PacBio CCS reads Version 3.15.2 of
            SPAdes supports paired-end reads, mate-pairs and unpaired reads.
            SPAdes can take as input several paired-end and mate-pair
            libraries simultaneously. workspace_name - the name of the
@@ -127,9 +126,8 @@ class kb_SPAdes(object):
            report.) -> structure: parameter "report_name" of String,
            parameter "report_ref" of String
         """
-        return self._client.call_method(
-            'kb_SPAdes.run_HybridSPAdes',
-            [params], self._service_ver, context)
+        return self._client.call_method('kb_SPAdes.run_HybridSPAdes',
+                                        [params], self._service_ver, context)
 
     def run_metaSPAdes(self, params, context=None):
         """
@@ -164,9 +162,8 @@ class kb_SPAdes(object):
            report.) -> structure: parameter "report_name" of String,
            parameter "report_ref" of String
         """
-        return self._client.call_method(
-            'kb_SPAdes.run_metaSPAdes',
-            [params], self._service_ver, context)
+        return self._client.call_method('kb_SPAdes.run_metaSPAdes',
+                                        [params], self._service_ver, context)
 
     def status(self, context=None):
         return self._client.call_method('kb_SPAdes.status',

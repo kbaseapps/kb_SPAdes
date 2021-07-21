@@ -17,7 +17,7 @@ RUN pip install --upgrade pip \
     && pip3 install psutil \
     && python --version
 
-ENV SPADES_VERSION='3.13.0'
+ENV SPADES_VERSION='3.15.2'
 
 RUN cd /opt \
     && wget http://cab.spbu.ru/files/release${SPADES_VERSION}/SPAdes-${SPADES_VERSION}-Linux.tar.gz \
