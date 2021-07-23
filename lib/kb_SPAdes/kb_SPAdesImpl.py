@@ -56,7 +56,7 @@ A coverage cutoff is not specified.
     ######################################### noqa
     VERSION = "1.3.0"
     GIT_URL = "https://github.com/kbaseapps/kb_SPAdes"
-    GIT_COMMIT_HASH = "c2a1f467bba10f1ad4296eca5aba29141cbce0d1"
+    GIT_COMMIT_HASH = "689ef58485f1023ceed6156d5e917b6e07715aef"
 
     #BEGIN_CLASS_HEADER
     # Class variables and functions can be defined in this block

@@ -60,7 +60,7 @@ class KBaseAuth(object):
     A very basic KBase auth client for the Python server.
     '''
 
-    _LOGIN_URL = 'https://kbase.us/services/authorization/Sessions/Login'
+    _LOGIN_URL = 'https://kbase.us/services/auth/api/legacy/KBase/Sessions/Login'
 
     def __init__(self, auth_url=None):
         '''
