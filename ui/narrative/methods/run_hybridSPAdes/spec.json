@@ -1,9 +1,9 @@
 {
-    "ver": "1.0.0",
+    "ver": "1.3.0",
     "authors": [
         "qzhang"
     ],
-    "contact": "http://kbase.us/contact-us/",
+    "contact": "http://kbase.us/support/",
     "categories": ["active", "assembly"],
     "widgets": {
         "input": null,

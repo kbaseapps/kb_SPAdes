@@ -1,7 +1,7 @@
 #
 # define display information
 #
-name: Assemble Reads with metaSPAdes - v3.13.0
+name: Assemble Reads with metaSPAdes - v3.15.2
 tooltip: |
     Assemble metagenomic reads using the SPAdes assembler.
 screenshots: []
@@ -74,9 +74,9 @@ description : |
     </ul>
     </p>
 
-    <p>For questions, please <a href=”http://kbase.us/contact-us/”>contact us</a>.</p>
+    <p>For questions, please <a href=”http://kbase.us/support/”>contact us</a>.</p>
 
-    <p>SPAdes version: 3.13.0</p>
+    <p>SPAdes version: 3.15.2 was released under GPLv2 on March 8, 2021</p>
 
 publications :
     -

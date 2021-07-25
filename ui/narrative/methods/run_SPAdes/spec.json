@@ -1,9 +1,9 @@
 {
-    "ver": "1.1.1",
+    "ver": "1.3.0",
     "authors": [
         "gaprice"
     ],
-    "contact": "http://kbase.us/contact-us/",
+    "contact": "http://kbase.us/support/",
     "categories": ["active", "assembly"],
     "widgets": {
         "input": null,

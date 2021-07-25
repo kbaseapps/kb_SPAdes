@@ -1,3 +1,11 @@
+### Version 1.3.0
+__Changes__
+- updated SPAdes to 3.15.2
+- added github actions tests
+- made unit test data upload via ReadsUtil.upload_reads()
+- fixed broken unit tests
+- completed port from python 2 to 3
+
 ### Version 1.2.5
 __Changes__
 - removed HTML from input params to hybridSPAdes

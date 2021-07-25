@@ -44,7 +44,7 @@ class SPAdesUtils:
     """
     Define the SPAdesUtils functions
     """
-    SPADES_VERSION = '3.13.0'
+    SPADES_VERSION = '3.15.2'
     SPADES_BIN = '/opt/SPAdes-' + SPADES_VERSION + '-Linux/bin'
 
     DISABLE_SPADES_OUTPUT = False  # should be False in production
