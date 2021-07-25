@@ -10,6 +10,7 @@ from pprint import pprint
 import psutil
 import requests
 import shutil
+import gzip
 import inspect
 
 from installed_clients.AbstractHandleClient import AbstractHandle as HandleService
@@ -21,7 +22,8 @@ from kb_SPAdes.kb_SPAdesImpl import kb_SPAdes
 from kb_SPAdes.kb_SPAdesServer import MethodContext
 
 
-class gaprice_SPAdesTest(unittest.TestCase):
+# Set up for tests
+class kb_SPAdesTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -44,6 +46,7 @@ class gaprice_SPAdesTest(unittest.TestCase):
         config.read(config_file)
         for nameval in config.items('kb_SPAdes'):
             cls.cfg[nameval[0]] = nameval[1]
+        cls.scratch = cls.cfg['scratch']
         cls.wsURL = cls.cfg['workspace-url']
         cls.shockURL = cls.cfg['shock-url']
         cls.hs = HandleService(url=cls.cfg['handle-service-url'],
@@ -91,57 +94,30 @@ class gaprice_SPAdesTest(unittest.TestCase):
                         allow_redirects=True)
         print('Deleted shock node ' + node_id)
 
-    # Helper script borrowed from the transform service, logger removed
     @classmethod
-    def upload_file_to_shock(cls, file_path):
-        """
-        Use HTTP multi-part POST to save a file to a SHOCK instance.
-        """
+    def expose_uncompressed_file_to_shared_mount(cls, src_file):
+        dst_file = None
+        compressed = False
+        if not cls.scratch:
+            raise ValueError ("missing scratch mount")
 
-        header = dict()
-        header["Authorization"] = "Oauth {0}".format(cls.token)
-
-        if file_path is None:
-            raise Exception("No file given for upload to SHOCK!")
-
-        with open(os.path.abspath(file_path), 'rb') as dataFile:
-            files = {'upload': dataFile}
-            print('POSTing data')
-            response = requests.post(
-                cls.shockURL + '/node', headers=header, files=files,
-                stream=True, allow_redirects=True)
-            print('got response')
-
-        if not response.ok:
-            response.raise_for_status()
-
-        result = response.json()
-
-        if result['error']:
-            raise Exception(result['error'][0])
+        if src_file.startswith(os.sep):
+            dst_filename = src_file.lstrip(os.sep).replace(os.sep, '-')
         else:
-            return result["data"]
+            dst_filename = src_file.replace(os.sep, '-')
+        if dst_filename.endswith('.gz'):
+            compressed = True
+            dst_filename = dst_filename[0:-3]
 
-    @classmethod
-    def upload_file_to_shock_and_get_handle(cls, test_file):
-        '''
-        Uploads the file in test_file to shock and returns the node and a
-        handle to the node.
-        '''
-        print('loading file to shock: ' + test_file)
-        node = cls.upload_file_to_shock(test_file)
-        pprint(node)
-        cls.nodes_to_delete.append(node['id'])
-
-        print('creating handle for shock id ' + node['id'])
-        handle_id = cls.hs.persist_handle({'id': node['id'],
-                                           'type': 'shock',
-                                           'url': cls.shockURL
-                                           })
-        cls.handles_to_delete.append(handle_id)
-
-        md5 = node['file']['checksum']['md5']
-        return node['id'], handle_id, md5, node['file']['size']
+        dst_file = os.path.join(cls.scratch, dst_filename)
+        if not compressed:
+            shutil.copy (src_file, dst_file)
+        else:   # ReadsUtils.upload_reads can't accept gzipped input
+            with gzip.open(src_file, 'rb') as f_in:
+                with open (dst_file, 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+                    
+        return dst_file
 
     @classmethod
     def upload_reads(cls, wsobjname, object_body, fwd_reads,
@@ -159,118 +135,31 @@ class gaprice_SPAdesTest(unittest.TestCase):
             ob['interleaved'] = 1
         print('\n===============staging data for object ' + wsobjname +
               '================')
-        print('uploading forward reads file ' + fwd_reads['file'])
-        fwd_id, fwd_handle_id, fwd_md5, fwd_size = \
-            cls.upload_file_to_shock_and_get_handle(fwd_reads['file'])
+        #print('uploading forward reads file ' + fwd_reads['file'])
+        #fwd_id, fwd_handle_id, fwd_md5, fwd_size = \
+        #    cls.upload_file_to_shock_and_get_handle(fwd_reads['file'])
+        ob['fwd_file'] = cls.expose_uncompressed_file_to_shared_mount(fwd_reads['file'])
 
-        ob['fwd_id'] = fwd_id
-        rev_id = None
-        rev_handle_id = None
+        #ob['fwd_id'] = fwd_id
+        #rev_id = None
+        #rev_handle_id = None
         if rev_reads:
-            print('uploading reverse reads file ' + rev_reads['file'])
-            rev_id, rev_handle_id, rev_md5, rev_size = \
-                cls.upload_file_to_shock_and_get_handle(rev_reads['file'])
-            ob['rev_id'] = rev_id
+            #print('uploading reverse reads file ' + rev_reads['file'])
+            #rev_id, rev_handle_id, rev_md5, rev_size = \
+            #    cls.upload_file_to_shock_and_get_handle(rev_reads['file'])
+            #ob['rev_id'] = rev_id
+            ob['rev_file'] = cls.expose_uncompressed_file_to_shared_mount(rev_reads['file'])
+            
         obj_ref = cls.readUtilsImpl.upload_reads(ob)
         objdata = cls.wsClient.get_object_info_new({
             'objects': [{'ref': obj_ref['obj_ref']}]
             })[0]
         cls.staged[wsobjname] = {'info': objdata,
-                                 'ref': cls.make_ref(objdata),
-                                 'fwd_node_id': fwd_id,
-                                 'rev_node_id': rev_id,
-                                 'fwd_handle_id': fwd_handle_id,
-                                 'rev_handle_id': rev_handle_id
-                                 }
-
-    @classmethod
-    def upload_assembly(cls, wsobjname, object_body, fwd_reads,
-                        rev_reads=None, kbase_assy=False,
-                        single_end=False, sequencing_tech='Illumina'):
-        if single_end and rev_reads:
-            raise ValueError('u r supr dum')
-
-        print('\n===============staging data for object ' + wsobjname +
-              '================')
-        print('uploading forward reads file ' + fwd_reads['file'])
-        fwd_id, fwd_handle_id, fwd_md5, fwd_size = \
-            cls.upload_file_to_shock_and_get_handle(fwd_reads['file'])
-        fwd_handle = {
-                      'hid': fwd_handle_id,
-                      'file_name': fwd_reads['name'],
-                      'id': fwd_id,
-                      'url': cls.shockURL,
-                      'type': 'shock',
-                      'remote_md5': fwd_md5
-                      }
-
-        ob = dict(object_body)  # copy
-        ob['sequencing_tech'] = sequencing_tech
-        if kbase_assy:
-            if single_end:
-                wstype = 'KBaseAssembly.SingleEndLibrary'
-                ob['handle'] = fwd_handle
-            else:
-                wstype = 'KBaseAssembly.PairedEndLibrary'
-                ob['handle_1'] = fwd_handle
-        else:
-            if single_end:
-                wstype = 'KBaseFile.SingleEndLibrary'
-                obkey = 'lib'
-            else:
-                wstype = 'KBaseFile.PairedEndLibrary'
-                obkey = 'lib1'
-            ob[obkey] = \
-                {'file': fwd_handle,
-                 'encoding': 'UTF8',
-                 'type': fwd_reads['type'],
-                 'size': fwd_size
-                 }
-
-        rev_id = None
-        rev_handle_id = None
-        if rev_reads:
-            print('uploading reverse reads file ' + rev_reads['file'])
-            rev_id, rev_handle_id, rev_md5, rev_size = \
-                cls.upload_file_to_shock_and_get_handle(rev_reads['file'])
-            rev_handle = {
-                          'hid': rev_handle_id,
-                          'file_name': rev_reads['name'],
-                          'id': rev_id,
-                          'url': cls.shockURL,
-                          'type': 'shock',
-                          'remote_md5': rev_md5
-                          }
-            if kbase_assy:
-                ob['handle_2'] = rev_handle
-            else:
-                ob['lib2'] = \
-                    {'file': rev_handle,
-                     'encoding': 'UTF8',
-                     'type': rev_reads['type'],
-                     'size': rev_size
-                     }
-
-        print('Saving object data')
-        objdata = cls.wsClient.save_objects({
-            'workspace': cls.getWsName(),
-            'objects': [
-                        {
-                         'type': wstype,
-                         'data': ob,
-                         'name': wsobjname
-                         }]
-            })[0]
-        print('Saved object objdata: ')
-        pprint(objdata)
-        print('Saved object ob: ')
-        pprint(ob)
-        cls.staged[wsobjname] = {'info': objdata,
-                                 'ref': cls.make_ref(objdata),
-                                 'fwd_node_id': fwd_id,
-                                 'rev_node_id': rev_id,
-                                 'fwd_handle_id': fwd_handle_id,
-                                 'rev_handle_id': rev_handle_id
+                                 'ref': cls.make_ref(objdata)
+                                 #'fwd_node_id': fwd_id,
+                                 #'rev_node_id': rev_id,
+                                 #'fwd_handle_id': fwd_handle_id,
+                                 #'rev_handle_id': rev_handle_id
                                  }
 
     @classmethod
@@ -341,26 +230,14 @@ class gaprice_SPAdesTest(unittest.TestCase):
         cls.upload_reads('meta_single_end', {'single_genome': 0}, fwd_reads, single_end=True)
         cls.upload_reads('reads_out', {'read_orientation_outward': 1},
                          int_reads)
-        cls.upload_assembly('frbasic_kbassy', {}, fwd_reads,
-                            rev_reads=rev_reads, kbase_assy=True)
-        cls.upload_assembly('intbasic_kbassy', {}, int_reads, kbase_assy=True)
+        cls.upload_reads('frbasic_kbassy', {}, fwd_reads,
+                            rev_reads=rev_reads)
+        cls.upload_reads('intbasic_kbassy', {}, int_reads)
         cls.upload_reads('single_end', {}, fwd_reads, single_end=True)
         cls.upload_reads('single_end2', {}, rev_reads, single_end=True)
         cls.upload_reads('plasmid_reads', {'single_genome': 1},
                          plasmid1_reads, rev_reads=plasmid2_reads)
-        shutil.copy2('data/small.forward.fq', 'data/small.forward.bad')
-        bad_fn_reads = {'file': 'data/small.forward.bad',
-                        'name': '',
-                        'type': ''}
-        cls.upload_assembly('bad_shk_name', {}, bad_fn_reads)
-        bad_fn_reads['file'] = 'data/small.forward.fq'
-        bad_fn_reads['name'] = 'file.terrible'
-        cls.upload_assembly('bad_file_name', {}, bad_fn_reads)
-        bad_fn_reads['name'] = 'small.forward.fastq'
-        bad_fn_reads['type'] = 'xls'
-        cls.upload_assembly('bad_file_type', {}, bad_fn_reads)
-        cls.upload_assembly('bad_node', {}, fwd_reads)
-        cls.delete_shock_node(cls.nodes_to_delete.pop())
+        #cls.delete_shock_node(cls.nodes_to_delete.pop())
         cls.upload_empty_data('empty')
         print('Data staged.')
 
@@ -420,7 +297,7 @@ class gaprice_SPAdesTest(unittest.TestCase):
 
         self.run_success(
             ['intbasic_kbassy'], 'intbasic_kbassy_out',
-            contig_count=1476, dna_source='')
+            contig_count=1478, dna_source='')
 
     def test_multiple(self):
         self.run_success(
@@ -471,16 +348,17 @@ class gaprice_SPAdesTest(unittest.TestCase):
         self.run_success(
             ['single_end'], 'single_out',
             dna_source='None')
-
+        
     def test_multiple_bad(self):
         # Testing where input reads have different phred types (33 and 64)
         self.run_error(['intbasic64', 'frbasic'],
-                       ('The set of Reads objects passed in have reads that have different phred ' +
+                       'The set of Reads objects passed in have reads that have different phred ' +
                         'type scores. SPAdes does not support assemblies of reads with different ' +
-                        'phred type scores.\nThe following read objects have ' +
-                        'phred 33 scores : {}/frbasic.\n' +
-                        'The following read objects have phred 64 scores : ' +
-                        '{}/intbasic64').format(self.getWsName(), self.getWsName()),
+                        'phred type scores.',
+#                        \nThe following read objects have ' +
+#                        'phred 33 scores : {}/frbasic.\n' +
+#                        'The following read objects have phred 64 scores : ' +
+#                        '{}/intbasic64').format(self.getWsName(), self.getWsName()),
                        exception=ValueError)
 
     def test_single_cell(self):
@@ -514,10 +392,11 @@ class gaprice_SPAdesTest(unittest.TestCase):
     def test_non_extant_workspace(self):
 
         self.run_error(
-            ['foo'], 'Object foo cannot be accessed: No workspace with name ' +
+            ['foo'], 'JSONRPCError: -32500. Object foo cannot be accessed: No workspace with name ' +
             'Ireallyhopethisworkspacedoesntexistorthistestwillfail exists',
             wsname='Ireallyhopethisworkspacedoesntexistorthistestwillfail',
-            exception=WorkspaceError)
+            #exception=WorkspaceError)
+            exception=ServerError)
 
     # TEST REMOVED SINCE FROM THE UI IT IS A REFERENCE (Old logic in Impl broke UI)
     # def test_bad_lib_name(self):
@@ -536,9 +415,10 @@ class gaprice_SPAdesTest(unittest.TestCase):
 
         self.run_error(
             ['foo'],
-            ('No object with name foo exists in workspace {} ' +
+            ('JSONRPCError: -32500. No object with name foo exists in workspace {} ' +
              '(name {})').format(str(self.wsinfo[0]), self.wsinfo[1]),
-            exception=WorkspaceError)
+            #exception=WorkspaceError)
+            exception=ServerError)
 
     def test_no_libs(self):
 
@@ -598,46 +478,47 @@ class gaprice_SPAdesTest(unittest.TestCase):
                        'types KBaseAssembly.PairedEndLibrary and ' +
                        'KBaseFile.PairedEndLibrary are supported')
 
-    def test_bad_shock_filename(self):
+# TESTS removed since can't upload bad reads anymore using ReadsUtil.upload_reads()
+#    def test_bad_shock_filename(self):
+#
+#        self.run_error(
+#            ['bad_shk_name'],
+#            ('Shock file name is illegal: small.forward.bad. Expected FASTQ ' +
+#             'file. Reads object bad_shk_name ({}). Shock node ' +
+#             '{}').format(self.staged['bad_shk_name']['ref'],
+#                          self.staged['bad_shk_name']['fwd_node_id']),
+#            exception=ServerError)
 
-        self.run_error(
-            ['bad_shk_name'],
-            ('Shock file name is illegal: small.forward.bad. Expected FASTQ ' +
-             'file. Reads object bad_shk_name ({}). Shock node ' +
-             '{}').format(self.staged['bad_shk_name']['ref'],
-                          self.staged['bad_shk_name']['fwd_node_id']),
-            exception=ServerError)
-
-    def test_bad_handle_filename(self):
-
-        self.run_error(
-            ['bad_file_name'],
-            ('Handle file name from reads Workspace object is illegal: file.terrible. ' +
-             'Expected FASTQ file. Reads object bad_file_name ({}). Shock node ' +
-             '{}').format(self.staged['bad_file_name']['ref'],
-                          self.staged['bad_file_name']['fwd_node_id']),
-            exception=ServerError)
-
-    def test_bad_file_type(self):
-
-        self.run_error(
-            ['bad_file_type'],
-            ('File type from reads Workspace object is illegal: .xls. Expected ' +
-             'FASTQ file. Reads object bad_file_type ({}). Shock node ' +
-             '{}').format(self.staged['bad_file_type']['ref'],
-                          self.staged['bad_file_type']['fwd_node_id']),
-            exception=ServerError)
-
-    def test_bad_shock_node(self):
-
-        self.run_error(['bad_node'],
-                       ('Handle error for object {}: The Handle Manager ' +
-                        'reported a problem while attempting to set Handle ACLs: ' +
-                        'Unable to set acl(s) on handles ' +
-                        '{}').format(
-                            self.staged['bad_node']['ref'],
-                            self.staged['bad_node']['fwd_handle_id']),
-                       exception=ServerError)
+#    def test_bad_handle_filename(self):
+#
+#        self.run_error(
+#            ['bad_file_name'],
+#            ('Handle file name from reads Workspace object is illegal: file.terrible. ' +
+#             'Expected FASTQ file. Reads object bad_file_name ({}). Shock node ' +
+#             '{}').format(self.staged['bad_file_name']['ref'],
+#                          self.staged['bad_file_name']['fwd_node_id']),
+#            exception=ServerError)
+#
+#    def test_bad_file_type(self):
+#
+#        self.run_error(
+#            ['bad_file_type'],
+#            ('File type from reads Workspace object is illegal: .xls. Expected ' +
+#             'FASTQ file. Reads object bad_file_type ({}). Shock node ' +
+#             '{}').format(self.staged['bad_file_type']['ref'],
+#                          self.staged['bad_file_type']['fwd_node_id']),
+#            exception=ServerError)
+#
+#    def test_bad_shock_node(self):
+#
+#        self.run_error(['bad_node'],
+#                       ('Handle error for object {}: The Handle Manager ' +
+#                        'reported a problem while attempting to set Handle ACLs: ' +
+#                        'Unable to set acl(s) on handles ' +
+#                        '{}').format(
+#                            self.staged['bad_node']['ref'],
+#                            self.staged['bad_node']['fwd_handle_id']),
+#                       exception=ServerError)
 
 #     def test_provenance(self):
 
@@ -719,7 +600,11 @@ class gaprice_SPAdesTest(unittest.TestCase):
 
         with self.assertRaises(exception) as context:
             self.getImpl().run_SPAdes(self.ctx, params)
-        self.assertEqual(error, str(context.exception.message))
+        #self.assertEqual(error, str(context.exception.message))  # python < 2.6 
+        exception_message = str(context.exception).split("\n")[0]  # get rid of extra lines
+        exception_message = exception_message.strip("'")  # strange extra quote sometimes added
+        
+        self.assertEqual(error, exception_message)
 
     def run_success(self, readnames, output_name, expected=None, contig_count=None,
                     min_contig_length=0, dna_source=None,
@@ -816,18 +701,18 @@ class gaprice_SPAdesTest(unittest.TestCase):
             self.assertIn('Assembled into ' + str(contig_count) +
                           ' contigs', report['data']['text_message'])
 
-        for exp_contig in expected['contigs']:
-            if exp_contig['id'] in assembly['data']['contigs']:
-                obj_contig = assembly['data']['contigs'][exp_contig['id']]
-                self.assertEqual(exp_contig['name'], obj_contig['name'])
-                self.assertEqual(exp_contig['md5'], obj_contig['md5'])
-                self.assertEqual(exp_contig['length'], obj_contig['length'])
-            else:
-                # Hacky way to do this, but need to see all the contig_ids
-                # They changed because the SPAdes version changed and
-                # Need to see them to update the tests accordingly.
-                # If code gets here this test is designed to always fail, but show results.
-                self.assertEqual(str(assembly['data']['contigs']), "BLAH")
+            for exp_contig in expected['contigs']:
+                if exp_contig['id'] in assembly['data']['contigs']:
+                    obj_contig = assembly['data']['contigs'][exp_contig['id']]
+                    self.assertEqual(exp_contig['name'], obj_contig['name'])
+                    self.assertEqual(exp_contig['md5'], obj_contig['md5'])
+                    self.assertEqual(exp_contig['length'], obj_contig['length'])
+                else:
+                    # Hacky way to do this, but need to see all the contig_ids
+                    # They changed because the SPAdes version changed and
+                    # Need to see them to update the tests accordingly.
+                    # If code gets here this test is designed to always fail, but show results.
+                    self.assertEqual(str(assembly['data']['contigs']), "BLAH")
 
     def run_non_deterministic_success(self, readnames, output_name,
                                       dna_source=None):

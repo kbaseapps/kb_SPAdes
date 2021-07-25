@@ -15,11 +15,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: HybridSPAdesParams</p>
  * <pre>
- * ------To run HybridSPAdes 3.13.0 you need at least one library of the following types:------
+ * ------To run HybridSPAdes you need at least one library of the following types:------
  *  1) Illumina paired-end/high-quality mate-pairs/unpaired reads
  *  2) IonTorrent paired-end/high-quality mate-pairs/unpaired reads
  *  3) PacBio CCS reads
- * Version 3.13.0 of SPAdes supports paired-end reads, mate-pairs and unpaired reads.
+ * Version 3.15.2 of SPAdes supports paired-end reads, mate-pairs and unpaired reads.
  * SPAdes can take as input several paired-end and mate-pair libraries simultaneously.
  * workspace_name - the name of the workspace from which to take input
  *                  and store output.
