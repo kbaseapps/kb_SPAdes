@@ -1,7 +1,7 @@
 #
 # define display information
 #
-name: Assemble Reads with HybridSPAdes - v3.15.2
+name: Assemble Reads with HybridSPAdes - v3.15.3
 tooltip: |
     Assemble reads using the HybridSPAdes assembler.
 screenshots: []
@@ -102,7 +102,7 @@ parameter-groups :
 description : |
     <p>This is a KBase wrapper for <a href="http://cab.spbu.ru/software/spades/"> HYBRIDSPADES: an algorithm for hybrid assembly of short and long reads</a>. This program constructs the assembly graph from short reads using SPAdes, then maps long reads to that assembly graph, using the consensus to close any gaps[2].</p>
 
-    <p>SPAdes – St. Petersburg genome assembler – is an assembly toolkit containing various assembly pipelines. This <a href=”http://cab.spbu.ru/software/spades/”>manual</a> will help you to install and run SPAdes. SPAdes version 3.15.2 was released under GPLv2 on March 8, 2021.</p>
+    <p>SPAdes – St. Petersburg genome assembler – is an assembly toolkit containing various assembly pipelines. This <a href=”http://cab.spbu.ru/software/spades/”>manual</a> will help you to install and run SPAdes. SPAdes version 3.15.3 was released under GPLv2 on July 22, 2021.</p>
 
     <p>More information regarding the intricacies of HybridSPAdes can be found in the publications at the bottom of this App detail page.</p>
 
@@ -116,3 +116,8 @@ publications :
         display-text : |
             [2] Antipov D, Korobeynikov A, McLean J, Pevzner P. HYBRIDSPADES: an algorithm for hybrid assembly of short and long reads. Bioinformatics. 2016;32. 1009-1015. doi: 10.1093/bioinformatics/btv688
         link: https://academic.oup.com/bioinformatics/article/32/7/1009/1743807
+    -
+        display-text: |
+             [3] Prjibelski A, Antipov D, Meleshko D, Lapidus A, Korobeynikov A. Using SPAdes De Novo Assembler. Curr Protoc Bioinformatics. 2020 Jun;70(1):e102. doi: 10.1002/cpbi.102.
+        link: https://currentprotocols.onlinelibrary.wiley.com/doi/10.1002/cpbi.102
+        pmid: 32559359
