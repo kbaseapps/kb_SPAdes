@@ -1,6 +1,7 @@
 ### Version 1.3.1
 __Changes__
 - updated SPAdes to 3.15.3
+- dropped kb_SPAdesImpl.py MIN_MEMORY_GB from 5 to 4 to fit in Github Actions test node
 
 ### Version 1.3.0
 __Changes__
