@@ -50,7 +50,7 @@
             "optional": false,
             "advanced": false,
             "allow_multiple": false,
-            "default_values": ["SPAdes.contigs"],
+            "default_values": ["SPAdes.Assembly"],
             "field_type": "text",
             "text_options": {
                 "valid_ws_types" : [ "KBaseGenomeAnnotations.Assembly" ],
