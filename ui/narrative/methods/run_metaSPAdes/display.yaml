@@ -1,7 +1,7 @@
 #
 # define display information
 #
-name: Assemble Reads with metaSPAdes - v3.15.2
+name: Assemble Reads with metaSPAdes - v3.15.3
 tooltip: |
     Assemble metagenomic reads using the SPAdes assembler.
 screenshots: []
@@ -76,7 +76,7 @@ description : |
 
     <p>For questions, please <a href=”http://kbase.us/support/”>contact us</a>.</p>
 
-    <p>SPAdes version: 3.15.2 was released under GPLv2 on March 8, 2021</p>
+    <p>SPAdes version: 3.15.3 was released under GPLv2 on July 22, 2021</p>
 
 publications :
     -
@@ -84,3 +84,8 @@ publications :
              Nurk S, Meleshko D, Korobeynikov A, Pevzner PA. metaSPAdes: a new versatile metagenomic assembler. Genome Res. 2017; 27:824–834. doi: 10.1101/gr.213959.116
         link: https://www.ncbi.nlm.nih.gov/pubmed/28298430
         pmid: 28298430
+    -
+        display-text: |
+             Prjibelski A, Antipov D, Meleshko D, Lapidus A, Korobeynikov A. Using SPAdes De Novo Assembler. Curr Protoc Bioinformatics. 2020 Jun;70(1):e102. doi: 10.1002/cpbi.102.
+        link: https://currentprotocols.onlinelibrary.wiley.com/doi/10.1002/cpbi.102
+        pmid: 32559359
