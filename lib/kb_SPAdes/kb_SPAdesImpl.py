@@ -54,9 +54,9 @@ A coverage cutoff is not specified.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.3.0"
+    VERSION = "1.3.1"
     GIT_URL = "https://github.com/kbaseapps/kb_SPAdes"
-    GIT_COMMIT_HASH = "689ef58485f1023ceed6156d5e917b6e07715aef"
+    GIT_COMMIT_HASH = "d3e498270754c9b955f1b62ee0ee69ce91d79674"
 
     #BEGIN_CLASS_HEADER
     # Class variables and functions can be defined in this block
@@ -80,7 +80,7 @@ A coverage cutoff is not specified.
     MAX_THREADS = 64  # per email thread with Anton Korobeynikov
     MAX_THREADS_META = 128  # Increase threads for metagenomic assemblies
     MEMORY_OFFSET_GB = 1  # 1GB
-    MIN_MEMORY_GB = 5
+    MIN_MEMORY_GB = 4
     MAX_MEMORY_GB_SPADES = 500
     MAX_MEMORY_GB_META_SPADES = 1000
     GB = 1000000000
@@ -703,7 +703,7 @@ A coverage cutoff is not specified.
            HybridSPAdes you need at least one library of the following
            types:------ 1) Illumina paired-end/high-quality
            mate-pairs/unpaired reads 2) IonTorrent paired-end/high-quality
-           mate-pairs/unpaired reads 3) PacBio CCS reads Version 3.15.2 of
+           mate-pairs/unpaired reads 3) PacBio CCS reads Version 3.15.3 of
            SPAdes supports paired-end reads, mate-pairs and unpaired reads.
            SPAdes can take as input several paired-end and mate-pair
            libraries simultaneously. workspace_name - the name of the

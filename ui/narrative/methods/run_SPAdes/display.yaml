@@ -1,7 +1,7 @@
 #
 # define display information
 #
-name: Assemble Reads with SPAdes - v3.15.2
+name: Assemble Reads with SPAdes - v3.15.3
 tooltip: |
     Assemble reads using the SPAdes assembler.
 screenshots: []
@@ -64,13 +64,13 @@ parameters :
         short-hint : |
             Assembly only (No Error Correction).
 description : |
-    <p>The Assemble Reads with SPAdes App allows the user to assemble a genome from reads using the <a href="http://cab.spbu.ru/software/spades/" target="_blank">SPAdes 3.15.2</a> assembler, which is designed for small genomes and single cell sequencing.</p>
+    <p>The Assemble Reads with SPAdes App allows the user to assemble a genome from reads using the <a href="http://cab.spbu.ru/software/spades/" target="_blank">SPAdes 3.15.3</a> assembler, which is designed for small genomes and single cell sequencing.</p>
 
     <p>SPAdes is a <a href=”https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5531759/”>de Bruijn graph</a>-based assembler, which is noteworthy for its approach in applying multiple de Bruijn graphs (each built with different k-mer sizes) to better handle the large variations in coverage across the genome that are a characteristic of single cell sequencing, as well as a novel method for handling paired end information [1]. It begins its assembly process by using multisized de Bruijn graphs for constructing the assembly graph while detecting and removing chimeric reads. Next, distances between the k-mers are estimated for mapping the edges of the assembly graph. Afterwards, a paired assembly graph is constructed and SPAdes outputs a set of contiguous DNA sequences (contigs).</p>
 
     <p>The App <b><i>only</i></b> takes paired-end reads library as input; using a single-end library will result in an error. The user sets one basic parameter for the input DNA type: “standard” for isolate DNA, “single cell” for flow-sorted bacterial cells from multiple displacement amplification (MDA), or “plasmid” for plasmid DNA. After setting the input and DNA type parameter, the user then provides a name for the output assembly.</p>
 
-     <p>Additionally, there are three advanced input parameters: (i) minimum contig length to report (default 500), (ii) a list of k-mer sizes for the de Bruijn graphs, (iii) assembly only, which prevents any error correction. By default, SPAdes has its own methods for choosing which k-mer sizes to use, depending on the input sequence data type. The user can override automatic k-mer value selection by using the second advanced input parameter. Read more information about manually selecting k-mer values in the <a href=”http://cab.spbu.ru/files/release3.15.2/manual.html”>SPAdes user manual</a>.</p>
+     <p>Additionally, there are three advanced input parameters: (i) minimum contig length to report (default 500), (ii) a list of k-mer sizes for the de Bruijn graphs, (iii) assembly only, which prevents any error correction. By default, SPAdes has its own methods for choosing which k-mer sizes to use, depending on the input sequence data type. The user can override automatic k-mer value selection by using the second advanced input parameter. Read more information about manually selecting k-mer values in the <a href=”http://cab.spbu.ru/files/release3.15.3/manual.html”>SPAdes user manual</a>.</p>
 
     <p>Upon successful completion, the App creates a KBase Assembly object, which will appear in the data pane. A <a href=”http://bioinf.spbau.ru/quast”>QUAST</a> quality assessment report and summary are also generated.</p>
 
@@ -87,7 +87,7 @@ description : |
     </ul>
     </p>
 
-    <p>SPAdes version: 3.15.2 was released under GPLv2 on March 8, 2021</p>
+    <p>SPAdes version: 3.15.3 was released under GPLv2 on July 22, 2021</p>
 
     <p><strong>Team members who developed & deployed algorithm in KBase:</strong>
     Gavin Price. For questions, please <a href="http://kbase.us/support/">contact us</a>.</p>
@@ -96,6 +96,11 @@ description : |
 publications :
     -
         display-text: |
-             [1] Bankevich A, Nurk S, Antipov D, Gurevich AA, Dvorkin M, Kulikov AS, et al. SPAdes: A New Genome Assembly Algorithm and Its Applications to Single-Cell Sequencing. Journal of Computational Biology. 2012;19: 455-477. doi: 10.1089/cmb.2012.0021
+             Bankevich A, Nurk S, Antipov D, Gurevich AA, Dvorkin M, Kulikov AS, et al. SPAdes: A New Genome Assembly Algorithm and Its Applications to Single-Cell Sequencing. Journal of Computational Biology. 2012;19: 455-477. doi: 10.1089/cmb.2012.0021
         link: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3342519/
         pmid: 22506599
+    -
+        display-text: |
+             Prjibelski A, Antipov D, Meleshko D, Lapidus A, Korobeynikov A. Using SPAdes De Novo Assembler. Curr Protoc Bioinformatics. 2020 Jun;70(1):e102. doi: 10.1002/cpbi.102.
+        link: https://currentprotocols.onlinelibrary.wiley.com/doi/10.1002/cpbi.102
+        pmid: 32559359
