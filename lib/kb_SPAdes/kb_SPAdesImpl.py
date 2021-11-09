@@ -76,9 +76,9 @@ A coverage cutoff is not specified.
     INVALID_WS_OBJ_NAME_RE = re.compile('[^\\w\\|._-]')
     INVALID_WS_NAME_RE = re.compile('[^\\w:._-]')
 
-    THREADS_PER_CORE = 3
-    MAX_THREADS = 64  # per email thread with Anton Korobeynikov
-    MAX_THREADS_META = 128  # Increase threads for metagenomic assemblies
+    THREADS_PER_CORE = 1
+    MAX_THREADS = 32  # per email thread with Anton Korobeynikov
+    MAX_THREADS_META = 64  # Increase threads for metagenomic assemblies
     MEMORY_OFFSET_GB = 1  # 1GB
     MIN_MEMORY_GB = 4
     MAX_MEMORY_GB_SPADES = 500

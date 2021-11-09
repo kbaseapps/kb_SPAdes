@@ -1,3 +1,9 @@
+### Version 1.3.2
+__Changes__
+- changed THREADS_PER_CORE to 1
+- changed MAX_THREADS to 32 (for bigmem worker pool)
+- changed MAX_THREADS_META to 64 (for extreme worker pool)
+
 ### Version 1.3.1
 __Changes__
 - updated SPAdes to 3.15.3
