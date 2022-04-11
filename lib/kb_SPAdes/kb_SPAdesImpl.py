@@ -55,8 +55,8 @@ A coverage cutoff is not specified.
     # the latter method is running.
     ######################################### noqa
     VERSION = "1.3.1"
-    GIT_URL = "https://github.com/kbaseapps/kb_SPAdes"
-    GIT_COMMIT_HASH = "d3e498270754c9b955f1b62ee0ee69ce91d79674"
+    GIT_URL = "https://github.com/qzzhang/kb_SPAdes.git"
+    GIT_COMMIT_HASH = "0b6e5fcd6548764bf82a74b88abce30a930157d4"
 
     #BEGIN_CLASS_HEADER
     # Class variables and functions can be defined in this block
@@ -703,7 +703,7 @@ A coverage cutoff is not specified.
            HybridSPAdes you need at least one library of the following
            types:------ 1) Illumina paired-end/high-quality
            mate-pairs/unpaired reads 2) IonTorrent paired-end/high-quality
-           mate-pairs/unpaired reads 3) PacBio CCS reads Version 3.15.3 of
+           mate-pairs/unpaired reads 3) PacBio CCS reads Version 3.15.4 of
            SPAdes supports paired-end reads, mate-pairs and unpaired reads.
            SPAdes can take as input several paired-end and mate-pair
            libraries simultaneously. workspace_name - the name of the

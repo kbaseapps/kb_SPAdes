@@ -1,3 +1,7 @@
+### Version 1.3.2
+__Changes__
+- updated SPAdes to 3.15.4
+
 ### Version 1.3.1
 __Changes__
 - updated SPAdes to 3.15.3
