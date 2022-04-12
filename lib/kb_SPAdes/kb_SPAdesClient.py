@@ -76,7 +76,7 @@ class kb_SPAdes(object):
            HybridSPAdes you need at least one library of the following
            types:------ 1) Illumina paired-end/high-quality
            mate-pairs/unpaired reads 2) IonTorrent paired-end/high-quality
-           mate-pairs/unpaired reads 3) PacBio CCS reads Version 3.15.4 of
+           mate-pairs/unpaired reads 3) PacBio CCS reads Version 3.15.3 of
            SPAdes supports paired-end reads, mate-pairs and unpaired reads.
            SPAdes can take as input several paired-end and mate-pair
            libraries simultaneously. workspace_name - the name of the
