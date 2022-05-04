@@ -2,7 +2,7 @@ module-name:
     kb_SPAdes
 
 module-description:
-    SPAdes wrapper - http://cab.spbu.ru/software/spades/ - Running SPAdes 3.13.0
+    SPAdes wrapper - http://cab.spbu.ru/software/spades/ - Running SPAdes 3.15.3
 
 service-language:
     python
