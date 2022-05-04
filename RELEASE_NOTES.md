@@ -1,4 +1,4 @@
-### Version 1.3.2
+### Version 1.3.3
 __Changes__
 - Removed datatype of "KBaseGenomeAnnotations.Assembly" in the hybridSPAdes narrative input ui spec because this datatype is not supported by SPAdes itself.
 - dropped the minimum memory threshold in /lib/kb_SPAdes/utils/spades_utils.py MIN_MEMORY_GB from 5 to 4 to fit in Github Actions test node
