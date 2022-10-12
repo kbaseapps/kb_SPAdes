@@ -77,10 +77,9 @@ class SPAdesAssembler(object):
             report_file = self.SPAdes_final_scaffolds
             min_ctg_length = params.get('min_contig_length', 0)
             if min_ctg_length > 0:
-                self.s_utils.save_assembly(fa_file_path, wsname,
-                                           params[self.PARAM_IN_CS_NAME],
-                                           min_ctg_length)
-                report_file += '.filtered.fa'
+                report_file = self.s_utils.save_assembly(
+                    fa_file_path, wsname, params[self.PARAM_IN_CS_NAME], min_ctg_length
+                )['filtered_input']
             else:
                 self.s_utils.save_assembly(fa_file_path, wsname,
                                            params[self.PARAM_IN_CS_NAME])
