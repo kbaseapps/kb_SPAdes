@@ -820,13 +820,13 @@ class SPAdesUtils:
         if os.path.isfile(fa_file_path):
             log('Uploading FASTA file to Assembly...')
             if min_ctg_length > 0:
-                self.au.save_assembly_from_fasta(
+                return self.au.save_assembly_from_fasta2(
                             {'file': {'path': fa_file_path},
                              'workspace_name': wsname,
                              'assembly_name': a_name,
                              'min_contig_length': min_ctg_length})
             else:
-                self.au.save_assembly_from_fasta(
+                return self.au.save_assembly_from_fasta2(
                             {'file': {'path': fa_file_path},
                              'workspace_name': wsname,
                              'assembly_name': a_name})

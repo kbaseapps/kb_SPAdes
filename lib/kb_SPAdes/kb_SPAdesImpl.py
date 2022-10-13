@@ -665,17 +665,16 @@ A coverage cutoff is not specified.
         assemblyUtil = AssemblyUtil(self.callbackURL, token=ctx['token'], service_ver='release')
 
         if params.get('min_contig_length', 0) > 0:
-            assemblyUtil.save_assembly_from_fasta(
+            filtered_file = assemblyUtil.save_assembly_from_fasta2(
                 {'file': {'path': output_contigs},
                  'workspace_name': wsname,
                  'assembly_name': params[self.PARAM_IN_CS_NAME],
                  'min_contig_length': params['min_contig_length']
-                 })
+                 })['filtered_input']
             # load report from scaffolds.fasta.filtered.fa
-            report_name, report_ref = self.load_report(
-                output_contigs + '.filtered.fa', params, wsname)
+            report_name, report_ref = self.load_report(filtered_file, params, wsname)
         else:
-            assemblyUtil.save_assembly_from_fasta(
+            assemblyUtil.save_assembly_from_fasta2(
                 {'file': {'path': output_contigs},
                  'workspace_name': wsname,
                  'assembly_name': params[self.PARAM_IN_CS_NAME]

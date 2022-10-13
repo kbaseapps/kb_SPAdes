@@ -348,6 +348,11 @@ class kb_SPAdesTest(unittest.TestCase):
         self.run_success(
             ['single_end'], 'single_out',
             dna_source='None')
+
+    def test_single_reads_with_mcl(self):
+        self.run_success(
+            ['single_end'], 'single_out',
+            min_contig_length=1000, dna_source='None', contig_count=6)
         
     def test_multiple_bad(self):
         # Testing where input reads have different phred types (33 and 64)
@@ -659,6 +664,7 @@ class kb_SPAdesTest(unittest.TestCase):
 #            sorted(report['provenance'][0]['resolved_ws_objects']))
 
         assembly_ref = report['data']['objects_created'][0]['ref']
+        print("assembly_ref:", assembly_ref)
         assembly = self.wsClient.get_objects([{'ref': assembly_ref}])[0]
         # print("ASSEMBLY OBJECT:")
         self.assertEqual('KBaseGenomeAnnotations.Assembly', assembly['info'][2].split('-')[0])

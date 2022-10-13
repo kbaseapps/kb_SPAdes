@@ -1,3 +1,7 @@
+### Version 1.3.4
+__Changes__
+- Fixed a bug introduced by a change in AssemblyUtil that moved a file produced by AU.
+
 ### Version 1.3.3
 __Changes__
 - Removed datatype of "KBaseGenomeAnnotations.Assembly" in the hybridSPAdes narrative input ui spec because this datatype is not supported by SPAdes itself.
