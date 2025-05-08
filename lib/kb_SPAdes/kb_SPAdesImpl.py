@@ -81,8 +81,8 @@ A coverage cutoff is not specified.
     MAX_THREADS_META = 128  # Increase threads for metagenomic assemblies
     MEMORY_OFFSET_GB = 1  # 1GB
     MIN_MEMORY_GB = 4
-    MAX_MEMORY_GB_SPADES = 500
-    MAX_MEMORY_GB_META_SPADES = 1000
+    MAX_MEMORY_GB_SPADES = 200
+    MAX_MEMORY_GB_META_SPADES = 490
     GB = 1000000000
 
     URL_WS = 'workspace-url'
