@@ -1,4 +1,4 @@
-FROM kbase/sdkbase2:python
+FROM kbase/sdkpython:3.8.0
 MAINTAINER KBase Developer
 # -----------------------------------------
 # In this section, you can install any system dependencies required
@@ -14,13 +14,13 @@ RUN apt-get update \
     && apt-get -y install gcc
 
 RUN pip install --upgrade pip \
-    && pip3 install psutil \
+    && pip3 install psutil numpy pyyaml \
     && python --version
 
 ENV SPADES_VERSION='3.15.3'
 
 RUN cd /opt \
-    && wget http://cab.spbu.ru/files/release${SPADES_VERSION}/SPAdes-${SPADES_VERSION}-Linux.tar.gz \
+    && wget https://github.com/ablab/spades/releases/download/v3.15.3/SPAdes-3.15.3-Linux.tar.gz \
     && tar -xvzf SPAdes-${SPADES_VERSION}-Linux.tar.gz \
     && rm SPAdes-${SPADES_VERSION}-Linux.tar.gz
 
