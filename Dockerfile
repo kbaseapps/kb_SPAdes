@@ -14,7 +14,7 @@ RUN apt-get update \
     && apt-get -y install gcc
 
 RUN pip install --upgrade pip \
-    && pip3 install psutil \
+    && pip3 install psutil numpy pyyaml \
     && python --version
 
 ENV SPADES_VERSION='3.15.3'
